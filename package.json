@@ -1,0 +1,9 @@
+{
+  "name": "changelog-upgrade-advisor-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pinned npm version runtime for the local Python application",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "dependencies": { "semver": "7.8.5" }
+}
