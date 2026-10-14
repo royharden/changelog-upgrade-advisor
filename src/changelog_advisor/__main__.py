@@ -1,4 +1,4 @@
-"""Inert W0 command surface. Analysis is a later implementation slice."""
+"""Inert command surface. Structural models exist; analysis remains pending."""
 
 import argparse
 import json
@@ -12,10 +12,12 @@ def bootstrap_status() -> dict[str, object]:
     return {
         "application": "changelog-upgrade-advisor",
         "version": __version__,
-        "stage": "bootstrap",
+        "stage": "cited-models",
         "mode": "offline",
         "implemented_commands": ["status"],
         "analysis_available": False,
+        "structural_models_available": True,
+        "installed_domain_resolvers": 0,
         "provider_calls": 0,
         "pending": [
             "npm version and advisory analysis",

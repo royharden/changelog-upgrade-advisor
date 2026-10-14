@@ -1,6 +1,6 @@
 # Changelog Upgrade Advisor
 
-A local tool for dependency upgrade checklists with exact quoted evidence and explicit uncertainty. The current checkpoint contains an offline bootstrap; dependency analysis and findings are not implemented yet.
+A local tool for dependency upgrade checklists with exact quoted evidence and explicit uncertainty. The current checkpoint contains an offline status scaffold and reusable structural citation models; dependency analysis and actual evidence resolution remain pending.
 
 ## Quickstart
 
@@ -13,7 +13,7 @@ uv run advisor status
 uv run python scripts/demo.py --mode offline
 ```
 
-The status command reports bootstrap scope, offline mode and pending analysis. It requires no keys and does not inspect a manifest or generate findings. The required five-dependency/two-advisory demonstration is pending.
+The status command reports structural-model scope, offline mode, zero installed domain resolvers and pending analysis. It requires no keys and does not inspect a manifest or generate findings. The required five-dependency/two-advisory demonstration is pending.
 
 ## Intended workflow
 
@@ -21,7 +21,7 @@ Supply package.json, an optional package-lock, targets and per-package release n
 
 ## Architecture
 
-Python owns the local CLI and reusable modules. One pinned npm semver runtime will supply npm ordering/range semantics. S5 owns cited/versions; shared provider, ledger, evaluation and screening modules will come from verified owner commits. None of those foundation implementations is supplied by this bootstrap.
+Python owns the local CLI and reusable modules. `shared/cited` now supplies Pydantic structural Source/Finding/Pointer models, strict full-triple registry and resolver protocols. Five generated schemas live in `schemas/cited`; see [the cited module](docs/CITED.md) for its bounds and portable copy closure. No concrete domain adapter is installed. One pinned npm semver runtime will supply npm ordering/range semantics. Provider, ledger, evaluation and screening implementations remain pending verified owner sources.
 
 ## Results and cost
 
@@ -29,6 +29,6 @@ Upgrade accuracy, resolver coverage, latency and model cost are not yet measured
 
 ## Limits
 
-Only status is implemented. No manifest analysis, advisory fetcher, checklist renderer, citation export, model adapter, live test, evaluation corpus, installed viewer or deployment is claimed. See docs/LIMITATIONS.md and BOLT-HANDOFF.md. Tests and CI configuration cover the current bootstrap boundary, not a finished app.
+Only status and generic structural citation models/protocols are implemented. No manifest analysis, advisory fetcher, checklist renderer, concrete evidence resolver, model adapter, live test, evaluation corpus, installed viewer or deployment is claimed. See docs/LIMITATIONS.md and BOLT-HANDOFF.md. Tests and CI configuration cover this current boundary, not a finished app.
 
 Coding agents write this product; candidate checks and later independent review determine verified scope. No public-release or provisioning action is implied.
