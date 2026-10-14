@@ -1,8 +1,8 @@
-# Product instructions · version 2
+# Product instructions · version 3
 
 This repository contains the local upgrade advisor product. Agent registries, coordination, private plans, receipts and chat exports belong outside it. Do not initialize a registry here or commit agent artifacts, real credentials, private source inputs or customer data. Preserve unrelated work.
 
-Current implementation is the status scaffold plus generic cited structural models, strict triple registry/protocols and generated schemas. Every concrete domain resolver remains uninstalled, including supplied text. Dependency analysis, provider controllers, fixed evaluation fixtures and checklist rendering remain pending. Model validation is not source access, semantic verification or human approval. Do not fill missing work with fabricated findings/results.
+Current implementation is the status scaffold, generic cited models/registry/schemas, explicit supplied-memory line/section resolvers, and the npm version core. Default/app registry still installs nothing; concrete source adapters require caller policies and explicit installation. Version functions require the installed pinned Node helper, with no Python comparator fallback. Advisory clients, application dependency analysis, providers, fixed evaluation fixtures and checklist rendering remain pending. Model validation/quotes do not imply semantic verification or human approval. Do not fill missing work with fabricated findings/results.
 
 Commands from this repo root:
 
@@ -12,6 +12,7 @@ Commands from this repo root:
 - uv run ruff check .; uv run ruff format --check .
 - uv run pytest --junitxml=<receipt destination outside the repo>
 - uv run pytest tests/cited
+- uv run pytest tests/versions/core
 - uv run python -m changelog_advisor.shared.cited.schema --out schemas/cited
 - uv run python scripts/check_secrets.py --staged
 - uv run pre-commit install
@@ -24,4 +25,4 @@ Keep demo separate from fixed dev/heldout families. Freeze data/policy before tu
 
 For new infrastructure or Bolt handoff, use the environment's canonical bolt-new-infrastructure skill and state actual local runtime gaps. Before any listener or Docker resource use the configured agent-ports protocol and granted ownership/capacity. Resolve reusable skills through the canonical user catalog; skill content is not copied into this public product repo. Use sync-skills-across-agents when changing harness instructions. All harnesses should read this file; CLAUDE.md imports it.
 
-Changelog: version 2 corrects the implemented structural-model stage and model/schema test commands. Version 1 established W0 scope, portable commands, no-secret/offline and owner-contract invariants. Policy and canonical skill references are unchanged; CLAUDE.md imports this same file for all harnesses.
+Changelog: version 3 synchronizes actual optional memory-source/version-core stage and core test paths. Version 2 corrected structural-model stage/schema commands; version 1 established W0 commands and owner/offline invariants. Operating policy/canonical skill references are unchanged; CLAUDE.md imports this same file for all harnesses.

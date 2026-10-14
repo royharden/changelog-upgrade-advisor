@@ -1,0 +1,23 @@
+# Local npm version core
+
+This library computes deterministic facts from caller-supplied immutable manifest/lock/catalog JSON and one pinned semver7.8.5 runtime. It installs no supplied project, executes no scripts, follows no resolved URLs and fetches no registry/advisory data at this checkpoint. Imports are inert and Node-free; version operations explicitly require native Node>=22 and the locked semver dependency. Missing, timed-out, oversized or malformed runtime yields runtime_error/unknown/incomplete, never unaffected or a Python fallback.
+
+## Portable npm authority
+
+The sole implementation is shared/versions/semver.mjs. Root tools/semver.mjs only forwards to it. Python runtime.py locates the packaged sibling helper and native node.exe on Windows (no CMD/shim wrapper), uses argv lists/shell=False and bounded JSON stdin/stdout. It propagates only selected nonsecret host variables, with no NODE_OPTIONS/PATH module loader or provider secrets. The protocol has one exact operation/request-ID envelope; it rejects actions/unknown fields, invalid strings/counts and nonfinite/duplicate JSON fields. Error messages are fixed codes, not input/stderr dumps.
+
+Operations: validate_many/sort/between<=10000 strings, compare_pairs/satisfies_many<=1000 pairs; each string<=256, request/response<=2MiB, processing wait deadline5s, selected releases<=500. The helper checks the actual semver package version before work. Caller payloads never select executable/helper/module paths. Build metadata is retained in normalized identity and ignored by npm precedence. Range prerelease filtering uses npm defaults; release-window filtering is a separate explicit policy. No alternate Python arithmetic exists.
+
+Export the complete versions package INCLUDING semver.mjs and these docs/license, and provide a consumer npm lock with semver7.8.5. Copying Python files without the helper/dependency is incomplete. Root forwarding entry is optional for relocated API use. Actual owner commit/file/notice and detached checks must accompany later consumer vendoring; source availability alone proves no external registry truth or full runtime workflow.
+
+## Pin provenance and catalogs
+
+read_manifest accepts<=1MiB strict duplicate/nonfinite-free JSON and keeps dependencies,devDependencies,optionalDependencies declarations separately. It does not run other fields. At most20 distinct direct packages may be selected automatically; above that require explicit named subset, never first20. Unsupported source protocols/aliases remain unresolved. Lockfile accepts npm1/2/3,<=32MiB/250000entries; direct v1 dependency records or v2/v3 node_modules/<name> records only. Nested dependencies/links/missing/malformed pins cannot stand for a direct exact pin; resolved URLs are inert data.
+
+A lock pin must be a valid exact npm version satisfying the original manifest range. Without a lock, only exact manifest version or explicit user-asserted override can become a pin. Ranges/catalog maxima are previews, not installed truth. Override versus lock disagreement or unsatisfied manifest range is conflict. Scope/original spec/pin and lock digest/locator remain visible. Lock metadata is provenance, not a scan of installed node_modules or repository reachability.
+
+read_registry_snapshot accepts bounded supplied metadata with exact package identity/version record joins and explicit synthetic or saved_response origin. Its raw digest binds all versions/dist-tags; actual retrieval time stays caller metadata or unknown, never invented. Target must be listed in this supplied catalog. latest uses ONLY its cached latest tag, snapshot and tag projection hashes; it never picks numerical maximum. These are catalog facts with origin, not proof of a fresh/public registry request.
+
+Window is (pin,target], equality=no_upgrade and downgrade unsupported. Default includes stable releases plus prereleases on an explicitly prerelease pin/target's own base triples. all includes other prereleases; none still includes the explicit prerelease target. Exclusions are counted BEFORE the500selected cap; cap overflow yields incomplete with total count rather than silently claiming coverage. Unlisted targets, invalid/ambiguous catalog identities and runtime failures remain unknown/incomplete. No advisory/semantic safety conclusion follows from target inclusion or version ordering.
+
+Current tests are original synthetic implementation controls, not independent dev/heldout labels or a model benchmark. Run from the repo root: uv run pytest tests/versions/core. Advisory/cache/network code, source segmentation and the complete CLI remain subsequent implementation packages. No API or publication effects are authorized by library code.

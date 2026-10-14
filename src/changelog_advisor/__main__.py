@@ -1,4 +1,4 @@
-"""Inert command surface. Structural models exist; analysis remains pending."""
+"""Inert stage inventory. Local foundations exist; application analysis is pending."""
 
 import argparse
 import json
@@ -12,11 +12,17 @@ def bootstrap_status() -> dict[str, object]:
     return {
         "application": "changelog-upgrade-advisor",
         "version": __version__,
-        "stage": "cited-models",
+        "stage": "deterministic-foundations",
         "mode": "offline",
         "implemented_commands": ["status"],
         "analysis_available": False,
         "structural_models_available": True,
+        "library_capabilities": [
+            "supplied_memory_citations",
+            "npm_exact_pins",
+            "npm_release_windows",
+        ],
+        "version_runtime_required": "Node >=22 with semver@7.8.5",
         "installed_domain_resolvers": 0,
         "provider_calls": 0,
         "pending": [

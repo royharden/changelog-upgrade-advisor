@@ -1,6 +1,6 @@
 # Changelog Upgrade Advisor
 
-A local tool for dependency upgrade checklists with exact quoted evidence and explicit uncertainty. The current checkpoint contains an offline status scaffold and reusable structural citation models; dependency analysis and actual evidence resolution remain pending.
+A local tool for dependency upgrade checklists with exact quoted evidence and explicit uncertainty. Current local libraries provide supplied-memory citation resolution and npm pin/window facts. The status CLI reports this stage; the complete dependency workflow remains pending.
 
 ## Quickstart
 
@@ -13,7 +13,7 @@ uv run advisor status
 uv run python scripts/demo.py --mode offline
 ```
 
-The status command reports structural-model scope, offline mode, zero installed domain resolvers and pending analysis. It requires no keys and does not inspect a manifest or generate findings. The required five-dependency/two-advisory demonstration is pending.
+The status command reports local foundation scope, offline mode, zero app-installed resolvers and pending analysis. It requires no keys and does not inspect a manifest or generate findings. Explicit library callers can install memory sources and invoke the pinned npm runtime; the required five-dependency/two-advisory demonstration remains pending.
 
 ## Intended workflow
 
@@ -21,7 +21,7 @@ Supply package.json, an optional package-lock, targets and per-package release n
 
 ## Architecture
 
-Python owns the local CLI and reusable modules. `shared/cited` now supplies Pydantic structural Source/Finding/Pointer models, strict full-triple registry and resolver protocols. Five generated schemas live in `schemas/cited`; see [the cited module](docs/CITED.md) for its bounds and portable copy closure. No concrete domain adapter is installed. One pinned npm semver runtime will supply npm ordering/range semantics. Provider, ledger, evaluation and screening implementations remain pending verified owner sources.
+Python owns the local CLI and reusable modules. `shared/cited` supplies structural models, strict tuple dispatch and explicit caller-memory sources; five schemas live in `schemas/cited`. [Cited](docs/CITED.md) documents trusted policy injection and its portable closure. `shared/versions` uses one pinned npm semver runtime for arithmetic, manifest/lock provenance and catalog-bound release windows; [versions](docs/versions.md) documents limits and unavailable-runtime failures. Default registry remains empty. Provider, ledger, evaluation and screening implementations await verified owner sources.
 
 ## Results and cost
 
@@ -29,6 +29,6 @@ Upgrade accuracy, resolver coverage, latency and model cost are not yet measured
 
 ## Limits
 
-Only status and generic structural citation models/protocols are implemented. No manifest analysis, advisory fetcher, checklist renderer, concrete evidence resolver, model adapter, live test, evaluation corpus, installed viewer or deployment is claimed. See docs/LIMITATIONS.md and BOLT-HANDOFF.md. Tests and CI configuration cover this current boundary, not a finished app.
+Status and foundation libraries are implemented. No wired manifest-to-checklist workflow, advisory fetcher, semantic model adapter, live test, independent evaluation corpus, viewer or deployment is claimed. See docs/LIMITATIONS.md and BOLT-HANDOFF.md. Tests and CI configuration cover current boundaries, not a finished app. Runtime timeout/malformed/oversize outcomes remain explicit incomplete errors rather than unaffected conclusions.
 
 Coding agents write this product; candidate checks and later independent review determine verified scope. No public-release or provisioning action is implied.
