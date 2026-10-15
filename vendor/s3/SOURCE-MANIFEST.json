@@ -1,0 +1,206 @@
+{
+  "source": "local llm-router-eval",
+  "commit": "c7a03a8a5aa91a3881782621d8a5f09c6b82520d",
+  "tree": "e0aa5796fa163fcbcb5ade87e6a33ed2e645c2e3",
+  "licence": "MIT",
+  "licence_path": "vendor/s3/LICENSE",
+  "runtime": [
+    {
+      "path": "src/changelog_advisor/shared/__init__.py",
+      "source_path": "src/llm_router_eval/shared/__init__.py",
+      "source_git_blob": "d54c1da1c6df701267a3ccc931aca3852992f333",
+      "sha256": "60913c6d12caa4ba9139d870ad493d4a68738580c996662d7ad7b8d71622e1b8"
+    },
+    {
+      "path": "src/changelog_advisor/shared/callledger/README.md",
+      "source_path": "src/llm_router_eval/shared/callledger/README.md",
+      "source_git_blob": "4eb6cce7d1bc853da62db8ce048247375caf0916",
+      "sha256": "bdc63ddb26832750654cdbffc09fca33d46b9e5ef2e0b7b1a34cac4e1cea0c50"
+    },
+    {
+      "path": "src/changelog_advisor/shared/callledger/__init__.py",
+      "source_path": "src/llm_router_eval/shared/callledger/__init__.py",
+      "source_git_blob": "6bb50990aee74ddaffdfd45933d87eb53d040be8",
+      "sha256": "0fe1e2b6e2b49e170e5e483d1406b8c36d1ce8e2b446845aad2bb741b7806571"
+    },
+    {
+      "path": "src/changelog_advisor/shared/callledger/ledger.py",
+      "source_path": "src/llm_router_eval/shared/callledger/ledger.py",
+      "source_git_blob": "595fc556e62adef5bef529b632445a152e718fbc",
+      "sha256": "207ccd4effe633f44863080957bafa4ca80752397e7aca4eafd541ff50eb2a1d"
+    },
+    {
+      "path": "src/changelog_advisor/shared/callledger/models.py",
+      "source_path": "src/llm_router_eval/shared/callledger/models.py",
+      "source_git_blob": "ad215ff2bbe06472295b06b66487f526cde59eb9",
+      "sha256": "7274d1eebed5370460d83af6e4187cc74037d0ab600889219423dbcdd81277e7"
+    },
+    {
+      "path": "src/changelog_advisor/shared/callledger/pricing.py",
+      "source_path": "src/llm_router_eval/shared/callledger/pricing.py",
+      "source_git_blob": "f8d63558e6238f3cabaf2c52611ab3e632dd29c9",
+      "sha256": "daf38f487eeb70b48cc4025c54a19eea581a2d5d00084f534d9f2b9a55056c74"
+    },
+    {
+      "path": "src/changelog_advisor/shared/callledger/projection.py",
+      "source_path": "src/llm_router_eval/shared/callledger/projection.py",
+      "source_git_blob": "7d20500102b07471caec6362f3b71099ff92df10",
+      "sha256": "5c0194e299b2c58f85e745ac093063dcb89689ea162ba378a37afc48a0f4dc69"
+    },
+    {
+      "path": "src/changelog_advisor/shared/providers/__init__.py",
+      "source_path": "src/llm_router_eval/shared/providers/__init__.py",
+      "source_git_blob": "67b42aa73e0e5cfa72f83c0669198f354ca4ed4a",
+      "sha256": "5294e9e9a55d6f645ba1fae741f467accdf3aae0caf9e9094a46784bff57421f"
+    },
+    {
+      "path": "src/changelog_advisor/shared/providers/adapters.py",
+      "source_path": "src/llm_router_eval/shared/providers/adapters.py",
+      "source_git_blob": "6baa3035f8bd7a04e54281833ff2fd144ed3f02b",
+      "sha256": "0f04a7f3231c2a22c36541b9cdaeb53214899d4da111f264eab73278847a3023"
+    },
+    {
+      "path": "src/changelog_advisor/shared/providers/captures.py",
+      "source_path": "src/llm_router_eval/shared/providers/captures.py",
+      "source_git_blob": "a632ff56ae51d0a416c0d08bf3a2090aeddfcbe8",
+      "sha256": "0c91934a090d5f1481fd1116c4ee74a073e0cc8b6ee9c1c8d19cacdce2ebde00"
+    },
+    {
+      "path": "src/changelog_advisor/shared/providers/controller.py",
+      "source_path": "src/llm_router_eval/shared/providers/controller.py",
+      "source_git_blob": "a82937f5c363b5b069b918c490e8f385e5e65c52",
+      "sha256": "7e607e319bafe93354d04571f82e7fae35365e21fec8d5ce393843f4d41366ac"
+    },
+    {
+      "path": "src/changelog_advisor/shared/providers/images.py",
+      "source_path": "src/llm_router_eval/shared/providers/images.py",
+      "source_git_blob": "9ff512f336a219cb7b4dedad400b523b4de1447e",
+      "sha256": "d847124ef8dc76461f3257df2586075f7ca9602bebe4a15009c6a48aefa6aa13"
+    },
+    {
+      "path": "src/changelog_advisor/shared/providers/models.py",
+      "source_path": "src/llm_router_eval/shared/providers/models.py",
+      "source_git_blob": "a2c2f478b881e1d172085355f9ee347bba919f9f",
+      "sha256": "7d00a646f583aec1b77abd8c956f1b0c830726be3c17ce37737ac05841060ea2"
+    },
+    {
+      "path": "src/changelog_advisor/shared/providers/schema.py",
+      "source_path": "src/llm_router_eval/shared/providers/schema.py",
+      "source_git_blob": "0d84ca157fa6bbd1fac3b7cbc0aba75751f552c3",
+      "sha256": "a0c4a84b14a95d2834a150e8fa16224ccec03e1a84325b359b92868a61613391"
+    }
+  ],
+  "test_adaptations": [
+    {
+      "path": "vendor/s3/tests/callledger/conftest.py",
+      "original_git_sha256": "28e43e5bf02fee49f0f6b33b17f80ba21d0223c6cd16de03bcb5ee2c3e605c1e",
+      "adapted_sha256": "b732d7043df96738175c4ef54774037b309ab1e87f514d1438895a297a932dcb"
+    },
+    {
+      "path": "vendor/s3/tests/callledger/test_accounting.py",
+      "original_git_sha256": "74495852b116984ea04e74ada5cf44a59507e494373ebe2c62bc5583f28dea62",
+      "adapted_sha256": "49a3cd94892ed1ad662a2bf07017922bd31da01362a3234b312bf57b1f4d4572"
+    },
+    {
+      "path": "vendor/s3/tests/callledger/test_boundaries.py",
+      "original_git_sha256": "f9d5ee02eb8cb1b144c3c694b34bccde2889cf20b83dbaf82eec9d9e7f58ee07",
+      "adapted_sha256": "e4a0445c321614c63224b7c80ee8fce4981745ed4ce898609bddbbb0bd935d86"
+    },
+    {
+      "path": "vendor/s3/tests/callledger/test_caller_limits.py",
+      "original_git_sha256": "11eb58ee756469c6f46f4e14be3c119403c2687d014d772e785f1c4b05168947",
+      "adapted_sha256": "3b8f8d2ae205957ca5c02fe27b25458f176dc8143385000c2eefcfe07ec2d860"
+    },
+    {
+      "path": "vendor/s3/tests/callledger/test_durability.py",
+      "original_git_sha256": "1755613e99dd303cd190044e1ac77a4f354702284ce950eed36ff4c699afb6a0",
+      "adapted_sha256": "572db789be3502ecd3f9d595f5e68e8c47cfebe024449301802169696f688547"
+    },
+    {
+      "path": "vendor/s3/tests/callledger/test_privacy.py",
+      "original_git_sha256": "c47ab433a9889945fb634b9f634e7c41681d5cf0e11b8983b88e051f0a12f152",
+      "adapted_sha256": "baf4ef17787e81dd2ef76fc8e8b8eb66b117ee5e991f44493fb34c6fe9dab3fa"
+    },
+    {
+      "path": "vendor/s3/tests/callledger/test_v1_migration.py",
+      "original_git_sha256": "4cf04018b8acf42ffd9c6f1163acb7e5dfaf730b8780a1b8a89a09c628a019ac",
+      "adapted_sha256": "516d6ec0922a37258fe1e319f24e08b693076ff86f36632aeb02b2669963220a"
+    },
+    {
+      "path": "vendor/s3/tests/contracts/conftest.py",
+      "original_git_sha256": "6eabce3377c93d21aa91129b3d6f2e9b8f3e5844db657d60f267f6565f0e24bf",
+      "adapted_sha256": "056724045901747083fff99bb009a478b5e985d33d34948b7eb7d18c163aca8f"
+    },
+    {
+      "path": "vendor/s3/tests/contracts/test_accounting_models.py",
+      "original_git_sha256": "8cb644a365c514722bfc9d8905b1366294751ffb737f3e27af0bfe9eafaab951",
+      "adapted_sha256": "45182684557705bdc1222cfca75b9895ba50336f292fbc1e2b6d14e0caf8e157"
+    },
+    {
+      "path": "vendor/s3/tests/contracts/test_context_identity.py",
+      "original_git_sha256": "288d43073eeb74133b2477fb36cd0aec22f651ea9d11434cd948bea52acf45be",
+      "adapted_sha256": "adb08f269f2aaa72d82af8db8a5ae87ff32a9951919be7bd6ed29b2f446a87ea"
+    },
+    {
+      "path": "vendor/s3/tests/contracts/test_result_provenance.py",
+      "original_git_sha256": "692a3c10d5f6798045ce84cb85ca6f097fb716059121ee0f7a878315e0075c60",
+      "adapted_sha256": "35be2ca54899676f8ae27d328b87373e17104b1ecca3ff0386dd6abf1f4d0844"
+    },
+    {
+      "path": "vendor/s3/tests/contracts/test_results_and_copy.py",
+      "original_git_sha256": "046b4e0400339ec151df94b4a7afcac684533d8557094222c4b9af1631c4603c",
+      "adapted_sha256": "62aa05942e1fba9e37b056ce8bef4dc4ee9c410f018f4f478bc976832548641b"
+    },
+    {
+      "path": "vendor/s3/tests/contracts/test_typed_wire.py",
+      "original_git_sha256": "94ea8bc5cec8bde47a6a7fbc8c748de8c52dadf5b30a7c067bfef6a7239dac59",
+      "adapted_sha256": "c2b33e5740b30f10e264508015fe56dd927a4fe5f007378e7a4282fc7a09f854"
+    },
+    {
+      "path": "vendor/s3/tests/prices/test_pricing.py",
+      "original_git_sha256": "0cb5d1348a8220513f5943af474416370a6e986a540e3376b25df38ecb2d241a",
+      "adapted_sha256": "11dc9e9bacf82f62ac3bcff2d297ea60da4a3b637edbf926d160ac15fec5f502"
+    },
+    {
+      "path": "vendor/s3/tests/providers/conftest.py",
+      "original_git_sha256": "b9dd0c50f8c8d07a4fc5c4e8e3c7b6740ef6ea405bf53dcee31ddbff26f64125",
+      "adapted_sha256": "ec4848bebf8f01062c17bd60d19ce9c326b1d58167419b9740f2ef11be14e475"
+    },
+    {
+      "path": "vendor/s3/tests/providers/test_controller.py",
+      "original_git_sha256": "0892e7e455a32253d057c70e4b099c62c6a901f586df7728f8d35b147f90e609",
+      "adapted_sha256": "a25a4085fea75a77577801ce37c01b0cfbf42e1c3903c59a363e0e463d8bddc0"
+    },
+    {
+      "path": "vendor/s3/tests/providers/test_foundation_cases.py",
+      "original_git_sha256": "7eecdff85bb4be9d033ade622931a6a3bdce0ea5154cc4302031263973705add",
+      "adapted_sha256": "f6bdd47eae8b51066512569f7832bca78990ce02c1a34c5707be72094d80b111"
+    },
+    {
+      "path": "vendor/s3/tests/providers/test_images.py",
+      "original_git_sha256": "1e14384e7199bec5842974b2b696ceefe8adc9c69331913c3bcf0028a3cf731a",
+      "adapted_sha256": "d22988e43101234eb17a7fbdcaa57541c10da8a4a04394a78fe89c0fd436a0f3"
+    },
+    {
+      "path": "vendor/s3/tests/providers/test_payloads.py",
+      "original_git_sha256": "68134acb018c237337d10194f53739d412e4ed4dfc6aa45d4a97380625030b86",
+      "adapted_sha256": "49bf9e3ba4a79f68e93763e336a7c40f566bc113f88c8917acad689d039982f1"
+    },
+    {
+      "path": "vendor/s3/tests/providers/test_provider_privacy.py",
+      "original_git_sha256": "140d38f72198402bb20c96f61a026d67b486ec675c54b5a886156adf036e575d",
+      "adapted_sha256": "1f2a788ffe188a94f101411a94151ab010933c5b1cc94632544f82d9e38991b8"
+    },
+    {
+      "path": "vendor/s3/scripts/generate_schemas.py",
+      "original_git_sha256": "5309750f2f171146461a3a1bd66e3a39d442b6e78867e85fe86bc87f56c2adfc",
+      "adapted_sha256": "08dbb52c4dc5f34200116ac28583dcc7ca5a5074e30aade0a6ba7597bab13b59"
+    },
+    {
+      "path": "vendor/s3/scripts/update_prices.py",
+      "original_git_sha256": "0cac5ca6afa4b6e4af2d21176dada595fcfbce2b33e92ef4b35408b036eeca0a",
+      "adapted_sha256": "4cfa8b57bf47ce3e54e83b2f5f1d246b4d25fb8893ca05e36603b9008dd2c0f1"
+    }
+  ],
+  "origin_limits": "mock/strict_replay/injected simulation, synthetic price/captures; no live SDK/account/quality acceptance"
+}
