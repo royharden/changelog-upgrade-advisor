@@ -23,7 +23,8 @@ def runtime(monkeypatch):
         raise AssertionError("unit source attempted network")
 
     monkeypatch.setattr(socket, "create_connection", forbidden)
-    return NodeSemver()
+    with NodeSemver() as oracle:
+        yield oracle
 
 
 def catalog(versions, latest=None):

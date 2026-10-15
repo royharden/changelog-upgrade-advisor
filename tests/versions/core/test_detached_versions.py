@@ -52,6 +52,7 @@ assert pin.version=="1.0.0" and pin.provenance=="manifest_exact"
 catalog=read_registry_snapshot(b'{"name":"pkg","versions":{"1.0.0":{},"1.1.0":{},"2.0.0":{}},"dist-tags":{"latest":"1.1.0"}}',"pkg",origin="synthetic")
 window=release_window(runtime,catalog,pin.version,"latest")
 assert window.releases==("1.1.0",) and window.complete
+runtime.close()
 assert not any(name.startswith("changelog_advisor") for name in sys.modules)
 print(json.dumps(dict(pin=pin.version,target=window.target,complete=window.complete,owner_imports=0)))
 """

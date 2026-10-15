@@ -78,16 +78,13 @@ function execute(op, args) {
   }
   fail('unknown_operation');
 }
-let size = 0, oversized = false, chunks = [];
-process.stdin.on('data', (chunk) => {
-  size += chunk.length;
-  if (size > MAX) { oversized = true; chunks = []; } else if (!oversized) chunks.push(chunk);
-});
-process.stdin.on('end', () => {
+let buffered = Buffer.alloc(0), requests = 0, stopped = false;
+function respond(raw, oversized = false) {
   let id = null, response;
   try {
     if (oversized) fail('request_limit');
-    const request = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if (++requests > 1000) fail('request_limit');
+    const request = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(raw));
     if (!keys(request, ['protocol_version', 'request_id', 'operation', 'args']) ||
       request.protocol_version !== 1 || typeof request.request_id !== 'string' ||
       !/^[a-zA-Z0-9_-]{1,64}$/.test(request.request_id) || typeof request.operation !== 'string') {
@@ -104,5 +101,33 @@ process.stdin.on('end', () => {
   let encoded = JSON.stringify(response);
   if (Buffer.byteLength(encoded, 'utf8') > MAX) encoded = JSON.stringify({
     protocol_version: 1, request_id: id, ok: false, error: 'response_limit' });
-  process.stdout.write(encoded);
+  process.stdout.write(encoded + '\n');
+}
+process.stdin.on('data', (chunk) => {
+  if (stopped) return;
+  // The caller submits one LF-framed bounded request at a time. EOF below also
+  // accepts the original one-object invocation without requiring a framing flag.
+  buffered = Buffer.concat([buffered, chunk]);
+  let newline;
+  while ((newline = buffered.indexOf(10)) >= 0) {
+    const frame = buffered.subarray(0, newline);
+    buffered = buffered.subarray(newline + 1);
+    respond(frame, frame.length > MAX);
+    if (frame.length > MAX || requests >= 1000) {
+      stopped = true;
+      buffered = Buffer.alloc(0);
+      process.stdin.pause();
+      return;
+    }
+  }
+  if (buffered.length > MAX) {
+    respond(Buffer.alloc(0), true);
+    stopped = true;
+    buffered = Buffer.alloc(0);
+    process.stdin.pause();
+  }
+});
+process.stdin.on('end', () => {
+  if (!stopped && buffered.length) respond(buffered);
+  buffered = Buffer.alloc(0);
 });

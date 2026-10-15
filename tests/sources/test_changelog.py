@@ -27,7 +27,8 @@ def npm():
         "2.0.0-beta.1",
         "V1.2.3",
     ]
-    info = dict(zip(versions, NodeSemver().validate_many(versions), strict=True))
+    with NodeSemver() as oracle:
+        info = dict(zip(versions, oracle.validate_many(versions), strict=True))
 
     class Oracle:
         def validate_many(self, values):
@@ -285,7 +286,8 @@ def test_source_bridge_rejects_foreign_and_tampered_spans(npm):
 
 
 def test_real_production_npm_heading_validation():
-    notes = parse_changelog(b"## v1.2.3\n- no prefilter\n", "demo", NodeSemver())
+    with NodeSemver() as oracle:
+        notes = parse_changelog(b"## v1.2.3\n- no prefilter\n", "demo", oracle)
     assert notes.status == "ready" and notes.headings[0].version == "1.2.3"
     assert notes.spans[0].text == "- no prefilter\n"
 

@@ -82,7 +82,8 @@ class CachedNode(NodeSemver):
 
 @pytest.fixture(scope="module")
 def npm():
-    return CachedNode()
+    with CachedNode() as oracle:
+        yield oracle
 
 
 @pytest.fixture(autouse=True)
@@ -341,7 +342,11 @@ def test_deep_unused_metadata_rejected(depth):
 
 def test_actual_runtime_membership_positive_and_negative():
     # No oracle cache: actual production IPC, source parsing and membership paths together.
-    runtime = NodeSemver()
+    with NodeSemver() as runtime:
+        _assert_actual_runtime_membership(runtime)
+
+
+def _assert_actual_runtime_membership(runtime):
     for record, version, expected in [
         (osv({"introduced": "0"}, {"fixed": "2.0.0"}), "1.0.0", "affected"),
         (osv({"introduced": "0"}, {"fixed": "2.0.0"}), "2.0.0", "not_affected"),

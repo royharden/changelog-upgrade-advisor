@@ -55,7 +55,8 @@ from renamed.shared.cited import Registry,ArtifactRef,ResolutionContext,Finding
 from renamed.shared.cited.memory import MemoryTextResolver,install_supplied_text
 from renamed.shared.cited.assessment import assess_required_evidence
 subprocess.Popen=original
-notes=parse_changelog('## 1.2.3\r\n- Removed é\r\n'.encode(),'demo',NodeSemver())
+with NodeSemver() as oracle:
+ notes=parse_changelog('## 1.2.3\r\n- Removed é\r\n'.encode(),'demo',oracle)
 assert notes.status=='ready'
 source=make_span_source(notes,notes.spans,namespace_id='namespace',source_id='notes')
 pointer=span_pointer(source,notes.spans[0])

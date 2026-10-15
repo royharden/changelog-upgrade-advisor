@@ -1,7 +1,9 @@
 """Bounded fixed-helper IPC; imports never start Node. No Python version comparator."""
 
+import hashlib
 import json
 import os
+import queue
 import shutil
 import subprocess
 import threading
@@ -74,7 +76,12 @@ def _transport(node: str, helper: Path, payload: bytes) -> tuple[int, bytes]:
 
     def write():
         try:
-            process.stdin.write(payload)
+            remaining = memoryview(payload)
+            while remaining:
+                written = process.stdin.write(remaining)
+                if not written:
+                    raise OSError("short protocol write")
+                remaining = remaining[written:]
             process.stdin.close()
         except (BrokenPipeError, OSError):
             pass
@@ -118,12 +125,323 @@ def _transport(node: str, helper: Path, payload: bytes) -> tuple[int, bytes]:
     return process.returncode, b"".join(output)
 
 
+def _remaining(deadline):
+    value = deadline - time.monotonic()
+    if value <= 0:
+        raise VersionRuntimeError("version_runtime_timeout")
+    return value
+
+
+def _operation(method):
+    """One deadline covers validation, lock, startup, IO and result validation."""
+
+    def run(self, *args, **kwargs):
+        deadline = time.monotonic() + 5
+        if not self._lock.acquire(timeout=_remaining(deadline)):
+            raise VersionRuntimeError("version_runtime_timeout")
+        self._local.deadline = deadline
+        try:
+            result = method(self, *args, **kwargs)
+            _remaining(deadline)
+            if self._worker is not None and self._worker.requests >= 1000:
+                self._abort()
+                if self._worker is not None:
+                    raise VersionRuntimeError("version_runtime_cleanup_pending")
+                _remaining(deadline)
+            return result
+        except VersionRuntimeError as error:
+            self._abort()
+            if error.pending_pid is not None:
+                self.pending_pids.add(error.pending_pid)
+            raise
+        finally:
+            self._local.deadline = None
+            self._lock.release()
+
+    return run
+
+
+def _identity(helper):
+    """Fixed helper and actual pinned npm module bytes; no configurable loader."""
+    module = next(
+        (
+            p / "node_modules/semver"
+            for p in helper.parents
+            if (p / "node_modules/semver/package.json").is_file()
+        ),
+        None,
+    )
+    if module is None:
+        raise VersionRuntimeError("version_runtime_unavailable")
+    metadata = _json((module / "package.json").read_bytes())
+    if metadata.get("version") != "7.8.5":
+        raise VersionRuntimeError("version_runtime_dependency_changed")
+    files = sorted(module.rglob("*.js")) + [module / "package.json"]
+    if len(files) > 256:
+        raise VersionRuntimeError("version_runtime_dependency_changed")
+    digest = hashlib.sha256(helper.read_bytes())
+    total = 0
+    for path in files:
+        if path.is_symlink() or path.resolve().is_relative_to(module.resolve()) is False:
+            raise VersionRuntimeError("version_runtime_dependency_changed")
+        body = path.read_bytes()
+        total += len(body)
+        if total > 4 * 1024 * 1024:
+            raise VersionRuntimeError("version_runtime_dependency_changed")
+        digest.update(str(path.relative_to(module)).encode("utf8"))
+        digest.update(hashlib.sha256(body).digest())
+    return digest.digest()
+
+
+class _Worker:
+    """Exactly one owned stdio process, bounded frames and explicit cleanup state."""
+
+    def __init__(self):
+        self.process = None
+        self.threads = []
+        self.cancelled = threading.Event()
+        self.failed = threading.Event()
+        self.response = queue.Queue(maxsize=1)
+        self.active = False
+        self.started = time.monotonic()
+        self.requests = 0
+        self.reason = "version_runtime_stream_error"
+        self.timer = None
+
+    @property
+    def pending(self):
+        return any(t.is_alive() for t in self.threads) or (
+            self.process is not None and self.process.poll() is None
+        )
+
+    def stop(self):
+        self.cancelled.set()
+        if self.timer is not None:
+            self.timer.cancel()
+        p = self.process
+        if p is not None:
+            if p.poll() is None:
+                try:
+                    p.kill()
+                except OSError:
+                    pass
+                try:
+                    p.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+            # Closing a pipe whose writer is stuck can itself block: join first,
+            # retain uncertain threads/process as pending rather than reuse it.
+        deadline = time.monotonic() + 1
+        for thread in self.threads:
+            if thread is not threading.current_thread():
+                thread.join(timeout=max(0, deadline - time.monotonic()))
+        # A cancelled startup can finish while stop joins its launch thread.
+        p = self.process
+        if p is not None and p.poll() is not None and not any(t.is_alive() for t in self.threads):
+            for stream in (p.stdin, p.stdout, p.stderr):
+                stream.close()
+
+    def fail(self, reason):
+        self.reason = reason
+        self.failed.set()
+        if self.process is not None:
+            try:
+                self.process.kill()
+            except OSError:
+                pass
+        try:
+            self.response.put_nowait(None)
+        except queue.Full:
+            pass
+
+    def start(self, node, helper, deadline):
+        ready = threading.Event()
+
+        def launch():
+            try:
+                env = {
+                    name: value
+                    for name in ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "TEMP", "TMP")
+                    if (value := os.environ.get(name)) is not None
+                }
+                self.process = subprocess.Popen(
+                    [node, str(helper)],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    env=env,
+                    bufsize=0,
+                )
+                if self.cancelled.is_set():
+                    self.process.kill()
+                    self.process.wait(timeout=1)
+            except (OSError, subprocess.TimeoutExpired):
+                self.failed.set()
+            finally:
+                ready.set()
+
+        thread = threading.Thread(target=launch, daemon=True)
+        self.threads.append(thread)
+        thread.start()
+        if not ready.wait(_remaining(deadline)):
+            self.cancelled.set()
+            raise VersionRuntimeError("version_runtime_startup_pending")
+        if self.failed.is_set() or self.process is None:
+            raise VersionRuntimeError("version_runtime_unavailable")
+
+        def stdout():
+            buffered = bytearray()
+            try:
+                while chunk := self.process.stdout.read(16384):
+                    parts = chunk.split(b"\n")
+                    for index, part in enumerate(parts):
+                        buffered.extend(part)
+                        if len(buffered) > MAX_ENVELOPE:
+                            self.fail("version_runtime_output_limit")
+                            return
+                        if index < len(parts) - 1:
+                            if not self.active or self.response.full():
+                                self.fail("version_runtime_extra_frame")
+                                return
+                            if any(parts[index + 1 :]):
+                                self.fail("version_runtime_extra_frame")
+                                return
+                            self.response.put_nowait(bytes(buffered))
+                            buffered.clear()
+                if not self.cancelled.is_set():
+                    self.fail("version_runtime_unexpected_eof")
+            except (OSError, ValueError, queue.Full):
+                if not self.cancelled.is_set():
+                    self.fail("version_runtime_stream_error")
+
+        def stderr():
+            count = 0
+            try:
+                while chunk := self.process.stderr.read(1024):
+                    count += len(chunk)
+                    if count > 8192:
+                        self.fail("version_runtime_stderr_limit")
+                        return
+            except (OSError, ValueError):
+                if not self.cancelled.is_set():
+                    self.fail("version_runtime_stream_error")
+
+        for target in (stdout, stderr):
+            thread = threading.Thread(target=target, daemon=True)
+            self.threads.append(thread)
+            thread.start()
+        self.timer = threading.Timer(
+            max(0, 120 - (time.monotonic() - self.started)),
+            self.fail,
+            args=("version_runtime_lifetime",),
+        )
+        self.timer.daemon = True
+        self.threads.append(self.timer)
+        self.timer.start()
+
+    def exchange(self, payload, deadline):
+        if self.failed.is_set() or not self.response.empty():
+            raise VersionRuntimeError(self.reason)
+        self.active = True
+        self.requests += 1
+
+        def write():
+            remaining = memoryview(payload + b"\n")
+            try:
+                while remaining:
+                    _remaining(deadline)
+                    written = self.process.stdin.write(remaining)
+                    if not written:
+                        raise OSError("short protocol write")
+                    remaining = remaining[written:]
+            except (OSError, ValueError, VersionRuntimeError):
+                self.fail("version_runtime_write_error")
+
+        thread = threading.Thread(target=write, daemon=True)
+        # Finished writers do not accumulate across up to1000 operations.
+        self.threads = [t for t in self.threads if t.is_alive()]
+        self.threads.append(thread)
+        thread.start()
+        try:
+            raw = self.response.get(timeout=_remaining(deadline))
+            thread.join(timeout=_remaining(deadline))
+            if thread.is_alive():
+                raise VersionRuntimeError("version_runtime_timeout")
+            if raw is None or self.failed.is_set():
+                raise VersionRuntimeError(self.reason)
+            _remaining(deadline)
+            return 0, raw
+        except queue.Empty:
+            raise VersionRuntimeError("version_runtime_timeout") from None
+        finally:
+            self.active = False
+
+
 class NodeSemver:
     def __init__(self):
-        self._transport = _transport
+        self._transport = self._exchange
         self.pending_pids: set[int] = set()
+        self._worker = None
+        self._fingerprint = None
+        self._closed = False
+        self._lock = threading.Lock()
+        self._local = threading.local()
+
+    def _abort(self):
+        if self._worker is not None:
+            self._worker.stop()
+            if self._worker.pending:
+                if self._worker.process is not None and self._worker.process.poll() is None:
+                    self.pending_pids.add(self._worker.process.pid)
+            else:
+                if self._worker.process is not None:
+                    self.pending_pids.discard(self._worker.process.pid)
+                self._worker = None
+
+    def close(self):
+        if not self._lock.acquire(timeout=5):
+            raise VersionRuntimeError("version_runtime_close_pending")
+        try:
+            self._closed = True
+            self._abort()
+            if self._worker is not None:
+                raise VersionRuntimeError("version_runtime_cleanup_pending")
+        finally:
+            self._lock.release()
+
+    def __enter__(self):
+        if self._closed:
+            raise VersionRuntimeError("version_runtime_closed")
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
+    def _exchange(self, node, helper, payload):
+        deadline = self._local.deadline
+        identity = _identity(helper)
+        _remaining(deadline)
+        if self._fingerprint is None:
+            self._fingerprint = identity
+        if identity != self._fingerprint:
+            raise VersionRuntimeError("version_runtime_dependency_changed")
+        if self._worker is not None:
+            if self._worker.cancelled.is_set():
+                raise VersionRuntimeError("version_runtime_cleanup_pending")
+            if self._worker.requests >= 1000 or time.monotonic() - self._worker.started >= 120:
+                self._abort()
+                _remaining(deadline)
+                if self._worker is not None:
+                    raise VersionRuntimeError("version_runtime_cleanup_pending")
+        if self._worker is None:
+            self._worker = _Worker()
+            self._worker.start(node, helper, deadline)
+        return self._worker.exchange(payload, deadline)
 
     def _request(self, operation: str, args: dict):
+        if self._closed:
+            raise VersionRuntimeError("version_runtime_closed")
         if self.pending_pids:
             raise VersionRuntimeError("version_runtime_cleanup_pending")
         identifier = uuid.uuid4().hex
@@ -177,6 +495,7 @@ class NodeSemver:
         ):
             raise VersionRuntimeError("version_runtime_input_invalid")
 
+    @_operation
     def validate_many(self, versions: list[str]) -> list[dict]:
         self._strings(versions)
         result = self._request("validate_many", {"versions": versions})
@@ -204,6 +523,7 @@ class NodeSemver:
                 raise VersionRuntimeError("version_runtime_protocol_error")
         return result
 
+    @_operation
     def compare_pairs(self, pairs: list[tuple[str, str]]) -> list[int]:
         if type(pairs) is not list or len(pairs) > 1000:
             raise VersionRuntimeError("version_runtime_input_invalid")
@@ -220,6 +540,7 @@ class NodeSemver:
             raise VersionRuntimeError("version_runtime_protocol_error")
         return result
 
+    @_operation
     def satisfies_many(self, pairs: list[tuple[str, str]]) -> list[dict]:
         if type(pairs) is not list or len(pairs) > 1000:
             raise VersionRuntimeError("version_runtime_input_invalid")
@@ -251,6 +572,7 @@ class NodeSemver:
                 raise VersionRuntimeError("version_runtime_protocol_error")
         return result
 
+    @_operation
     def sort(self, versions: list[str]) -> list[str]:
         self._strings(versions)
         result = self._request("sort", {"versions": versions})
@@ -262,6 +584,7 @@ class NodeSemver:
             raise VersionRuntimeError("version_runtime_protocol_error")
         return result
 
+    @_operation
     def between(self, versions: list[str], pin: str, target: str, prerelease="default") -> dict:
         self._strings(versions)
         self._strings([pin, target], 2)

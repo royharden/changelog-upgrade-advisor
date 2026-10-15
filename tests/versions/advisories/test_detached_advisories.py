@@ -42,6 +42,7 @@ subprocess.Popen=original;r=NodeSemver()
 assert membership(a,'demo','1.0.0',r).status=='affected'
 assert membership(a,'wrong','1.0.0',r).status=='not_applicable'
 assert group_membership(deduplicate((a,b))[0],'demo','1.0.0',r).status=='conflict'
+r.close()
 assert not any(n.startswith('changelog_advisor') for n in sys.modules)
 print(json.dumps({'owner_imports':0,'network':0,'actual_npm':True}))
 """
