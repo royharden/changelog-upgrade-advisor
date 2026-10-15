@@ -58,6 +58,10 @@ windows, note segmentation and separate advisory normalizers/client protocols.
 `judges` connects the plain keyword baseline and typed/generative request shapes.
 `pipeline`, `cli` and `report` join these into the offline application.
 
+The optional `shared/cited/fragments.py` export resolves explicit saved-text
+anchor maps with caller-owned access/current-generation policies. It performs
+no URL acquisition or HTML extraction. See [the cited contract](docs/CITED.md).
+
 The local source closure has a detached normal/refusal CLI control with its own
 pinned npm dependency. It does not import the original checkout or live SDKs.
 Published wheels and a hosted analysis service have not been qualified.

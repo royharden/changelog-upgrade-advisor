@@ -30,3 +30,6 @@
 - Verify each standalone report format against the same advisory evidence:
   installed/target membership, source identity, quote resolution and missing counts
   must remain visible without opening another artifact.
+- Keep saved-text anchor maps in the evidence artifact identity. Equal raw bytes
+  do not permit a changed fragment window, namespace or projection to reuse a
+  citation. Reuse the canonical text/line machinery rather than parsing it twice.

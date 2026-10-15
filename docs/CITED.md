@@ -2,7 +2,47 @@
 
 `src/changelog_advisor/shared/cited` is a reusable Python 3.12/Pydantic v2 module. Its base exports are structural models, an empty registry and an injected resolver protocol; they acquire no sources, fetch no URLs, invoke no models and install no domain adapters. The optional explicit memory-source extension below reads only retained caller buffers. Constructing a valid Pointer alone does not prove that the source/artifact exists, a quote occurs there, an OCR box is measured or a human authorized anything.
 
-The optional memory-source extension now explicitly resolves caller-supplied immutable text buffers for supplied_text/line and supplied_text/section. Importing the module or creating Registry still installs nothing. This library capability is not wired into the status CLI or dependency workflow. All other concrete domains remain unimplemented here. The base four-file model closure below still works unchanged; the concrete source closure additionally includes memory.py and assessment.py.
+The optional memory-source extension resolves caller-supplied immutable text buffers for supplied_text/line and supplied_text/section; the offline app uses this for release notes. The optional saved-fragment extension below resolves supplied saved-text anchor maps. Importing the module or creating Registry still installs nothing. These routes do not install producer-owned filesystem, OCR or code resolvers. The base model closure remains unchanged; concrete source consumers copy the corresponding optional modules and their dependencies.
+
+## Supplied saved-web fragments
+
+`SavedWebSource.from_bytes` in `cited/fragments.py` accepts immutable UTF-8 raw
+bytes, caller namespace/source/revision, explicit `identity` or `crlf-to-lf`
+newline policy and an explicit tuple of `SectionSpan(fragment_id,start,end)`
+anchor windows. It composes the existing MemorySource byte/line/section
+validation; it does not parse HTML, discover anchors, fetch a URL, read files or
+authenticate a capture. Anchors are exact logical IDs with no decoding or case
+normalization. Raw HTML must be converted by its actual producer under a separately
+documented projection; this adapter accepts only an explicit retained text view.
+
+The saved-web-fragments/1 artifact preimage is sorted compact UTF-8 JSON, without
+a trailing newline: `{algorithm:"saved-web-fragments/1",text_artifact_sha256:<memory artifact>}`.
+The nested supplied-text-memory/1 artifact binds the original hash, revision,
+namespace, canonical text, line map and every named window. Changing an anchor
+map changes saved artifact identity even when the original bytes are equal.
+`SavedWebSource.metadata` has source_type=saved_web; it cannot substitute the
+underlying supplied_text artifact. Retained metadata is recomputed before use.
+
+`SavedFragmentResolver(sources,access=...,generation=...)` uses the existing
+AccessPolicy/GenerationPolicy protocols and MemoryBounds ceilings. It checks
+policy references, literal allow, current source identity and retained bytes;
+access/current generation and retained integrity are checked again before
+disclosure. Only the named anchor window can resolve the literal quote. A quote
+in another anchor, wrong case/Unicode/newline, missing snapshot/anchor, stale
+generation, altered map, revoked/unknown policy or spatial/historical request
+cannot become resolved evidence. No quote returns the actual complete window
+within the existing result bound; oversized windows refuse instead of truncating.
+Literal resolution remains distinct from source authenticity or semantic truth.
+
+Install only with `install_saved_fragments(registry,resolver)`, which owns exactly
+url#fragment/saved_web/fragment and preserves an existing owner on duplicate
+registration. The optional detached closure is the base models/registry/
+rowcanonical plus memory.py, assessment.py and fragments.py, with Pydantic and
+the product MIT license. Tests relocate that exact closure and exercise actual
+resolution plus required-evidence downgrade with network, subprocess/Node,
+owner-app imports and key lookup denied. Consumers still need exact source
+commit/hash/license publication and their own joined check; this capability is
+not automatically wired into the CLI or an external consumer.
 
 ## Explicit memory sources
 
