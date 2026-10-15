@@ -1,4 +1,4 @@
-"""what_bug_this_catches: a screen copy silently replaces canonical S3 native types."""
+"""what_bug_this_catches: a screen copy replaces S3 types or collides in combined collection."""
 
 import builtins
 import importlib.util
