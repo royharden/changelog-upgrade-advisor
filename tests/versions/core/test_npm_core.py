@@ -330,6 +330,27 @@ def test_windows_native_runtime_never_selects_cmd_shim(runtime, monkeypatch):
     assert asked == ["node.exe" if os.name == "nt" else "node"]
 
 
+def test_transport_cleanup_failure_keeps_explicit_unknown_and_owned_pid(runtime):
+    def pending(*args):
+        raise VersionRuntimeError("version_runtime_cleanup_pending", pending_pid=98765)
+
+    runtime._transport = pending
+    result = resolve_pin(Declaration("test-pkg", "1.0.0", "dependencies"), runtime)
+    assert result.status == "runtime_error" and result.version is None
+    assert runtime.pending_pids == {98765}
+
+
+def test_raw_timeout_exception_is_sanitized_into_runtime_error(runtime):
+    import subprocess
+
+    def timeout(*args):
+        raise subprocess.TimeoutExpired(["private-command-canary"], 1)
+
+    runtime._transport = timeout
+    result = resolve_pin(Declaration("test-pkg", "1.0.0", "dependencies"), runtime)
+    assert result.reason == "version_runtime_timeout" and result.version is None
+
+
 @pytest.mark.parametrize("record", [True, {"version": "wrong"}, {"name": "wrong-package"}])
 def test_catalog_record_keys_do_not_fabricate_publication_when_identity_invalid(record):
     raw = encoded({"name": "test-pkg", "versions": {"1.0.0": record}})

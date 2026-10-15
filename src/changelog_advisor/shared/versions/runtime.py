@@ -13,9 +13,10 @@ MAX_ENVELOPE = 2 * 1024 * 1024
 
 
 class VersionRuntimeError(RuntimeError):
-    def __init__(self, reason: str):
+    def __init__(self, reason: str, pending_pid: int | None = None):
         super().__init__(reason)
         self.reason = reason
+        self.pending_pid = pending_pid
 
 
 def _json(raw: bytes):
@@ -48,6 +49,7 @@ def _transport(node: str, helper: Path, payload: bytes) -> tuple[int, bytes]:
         stderr=subprocess.PIPE,
         shell=False,
         env=env,
+        bufsize=0,
     )
     over = threading.Event()
     stream_error = threading.Event()
@@ -89,15 +91,26 @@ def _transport(node: str, helper: Path, payload: bytes) -> tuple[int, bytes]:
         process.wait(timeout=max(0, 5 - (time.monotonic() - started)))
     except subprocess.TimeoutExpired:
         timed_out = True
-        process.kill()
-        process.wait(timeout=1)
+        try:
+            process.kill()
+        except OSError:
+            pass
+        try:
+            process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            # An asynchronous OS termination must not escape as success or raw traceback.
+            pass
     finally:
         for thread in threads:
             thread.join(timeout=1)
         for stream in (process.stdin, process.stdout, process.stderr):
             stream.close()
     if timed_out:
-        raise VersionRuntimeError("version_runtime_timeout")
+        pending = process.pid if process.poll() is None else None
+        raise VersionRuntimeError(
+            "version_runtime_cleanup_pending" if pending else "version_runtime_timeout",
+            pending_pid=pending,
+        )
     if over.is_set():
         raise VersionRuntimeError("version_runtime_output_limit")
     if stream_error.is_set() or any(thread.is_alive() for thread in threads):
@@ -108,8 +121,11 @@ def _transport(node: str, helper: Path, payload: bytes) -> tuple[int, bytes]:
 class NodeSemver:
     def __init__(self):
         self._transport = _transport
+        self.pending_pids: set[int] = set()
 
     def _request(self, operation: str, args: dict):
+        if self.pending_pids:
+            raise VersionRuntimeError("version_runtime_cleanup_pending")
         identifier = uuid.uuid4().hex
         payload = json.dumps(
             {"protocol_version": 1, "request_id": identifier, "operation": operation, "args": args},
@@ -130,8 +146,12 @@ class NodeSemver:
             if len(raw) > MAX_ENVELOPE:
                 raise VersionRuntimeError("version_runtime_output_limit")
             response = _json(raw)
-        except VersionRuntimeError:
+        except VersionRuntimeError as error:
+            if error.pending_pid is not None:
+                self.pending_pids.add(error.pending_pid)
             raise
+        except subprocess.TimeoutExpired:
+            raise VersionRuntimeError("version_runtime_timeout") from None
         except (OSError, ValueError, TypeError):
             raise VersionRuntimeError("version_runtime_malformed") from None
         if (
