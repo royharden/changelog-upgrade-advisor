@@ -1,0 +1,14 @@
+{
+  "edition": "D5-author-001",
+  "scope": "Metadata companion; no source, label, split or sealed file changes",
+  "raw_source_sha256": "SHA256 of exact UTF-8 source bytes, which are also supplied as raw_bytes_base64",
+  "source_dto.source_sha256": "SHA256 of exact raw source bytes",
+  "excerpt_sha256": "SHA256 of exact UTF-8 literal quote bytes",
+  "snippet_sha256": "SHA256 of UTF-8 snippet bytes; null when no snippet",
+  "conflicting_record_sha256": "SHA256 of canonical JSON object bytes: UTF-8, ensure_ascii=False, sort_keys=True, separators=(',', ':')",
+  "conflicting_sources": "Each conflicting raw record additionally has its own source ID, literal serialized raw text and exact source_dto.source_sha256; canonical object hashes are distinct from those raw-byte hashes",
+  "input_and_label_inventory_hashes": "Same canonical JSON convention, computed independently for inputs and expected objects",
+  "file_hashes": "SHA256 of literal on-disk bytes including the final LF",
+  "origin": "original synthetic",
+  "acceptance": false
+}

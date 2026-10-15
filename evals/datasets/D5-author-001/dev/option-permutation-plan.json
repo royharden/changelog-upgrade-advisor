@@ -1,0 +1,59 @@
+{
+  "edition": "D5-author-001",
+  "split": "dev",
+  "representatives": [
+    "dev-s001",
+    "dev-s009",
+    "dev-s017",
+    "dev-s025",
+    "dev-s033",
+    "dev-s041"
+  ],
+  "category_orders": [
+    [
+      "removed",
+      "renamed",
+      "changed_default",
+      "behaviour_change",
+      "deprecation",
+      "none"
+    ],
+    [
+      "none",
+      "deprecation",
+      "behaviour_change",
+      "changed_default",
+      "renamed",
+      "removed"
+    ],
+    [
+      "renamed",
+      "changed_default",
+      "behaviour_change",
+      "deprecation",
+      "none",
+      "removed"
+    ],
+    [
+      "changed_default",
+      "none",
+      "removed",
+      "deprecation",
+      "renamed",
+      "behaviour_change"
+    ],
+    [
+      "deprecation",
+      "behaviour_change",
+      "renamed",
+      "none",
+      "removed",
+      "changed_default"
+    ]
+  ],
+  "planned_trials": 30,
+  "denominator_change": 0,
+  "expected_label_source": "existing frozen DEV rows only",
+  "execute": false,
+  "provider_answers": null
+}

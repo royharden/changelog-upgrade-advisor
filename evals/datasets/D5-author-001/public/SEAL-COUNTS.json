@@ -1,0 +1,86 @@
+{
+  "edition": "D5-author-001",
+  "author_identity": {
+    "workspace_id": "0046",
+    "app_id": "0004",
+    "workspace_callsign": "0046_Codex_GPT-6_Sub_BOLT-R01_FixtureAuthor_D5",
+    "app_callsign": "0004_Codex_GPT-6_Sub_BOLT-R01_FixtureAuthor_D5",
+    "session_id": "01a13d41-3e1c-7991-bbbf-2318aedc484b",
+    "model": "GPT-6",
+    "basis": "runtime developer instruction; no variant exposed"
+  },
+  "both_splits_sealed_at": "2026-10-15T02:14:47.385879+00:00",
+  "dev_publication_started_at": "2026-10-15T02:14:47.412634+00:00",
+  "private_seal_sha256": "d939a88741c0d2ee5f2fdb2a52d510d9503b04f538047fb7f6c907e87b0e5f92",
+  "heldout_sha256": {
+    "semantic.jsonl": "6d3b793b9b2da4c9f8ec4157fdf0ee9cc8faa52a5b1e1e1212a3c64e299cc10a",
+    "advisory.jsonl": "bc125c57366519c8b6857eef46ea685b58568ba29b327a2e4257bdb1bd7ddbf5"
+  },
+  "counts": {
+    "semantic": {
+      "dev": 60,
+      "heldout": 60,
+      "total": 120
+    },
+    "advisory": {
+      "dev": 20,
+      "heldout": 20,
+      "total": 40
+    },
+    "boundary": {
+      "separate": 40
+    },
+    "hostile": {
+      "dev": 6,
+      "heldout": 6,
+      "orthogonal": true
+    },
+    "option_orders": {
+      "representatives": 6,
+      "orders": 5,
+      "planned_trials": 30,
+      "additional_gold": 0
+    }
+  },
+  "abstract_floors": {
+    "each_split": {
+      "removed": 8,
+      "renamed": 8,
+      "changed_default": 8,
+      "behaviour_change": 8,
+      "pure_deprecation": 8,
+      "none": 20,
+      "none_subgroups": {
+        "internal": 6,
+        "misleading": 7,
+        "reverted_negated": 7
+      },
+      "breaking": 32,
+      "breaking_but_unused_minimum": 4,
+      "keyword_free_break_minimum": 6,
+      "advisory": {
+        "applies": 4,
+        "unrelated": 4,
+        "missing_ambiguous_unknown": 4,
+        "outside": 2,
+        "wrong_identity": 2,
+        "withdrawn_conflict": 2,
+        "unsupported": 2
+      },
+      "raw_schemas": [
+        "OSV",
+        "GHSA_REST"
+      ]
+    }
+  },
+  "heldout_access_to_parent": false,
+  "structural_selfcheck": {
+    "cases": 200,
+    "source_wire": 200,
+    "pointer_wire": 160,
+    "literal_spans": 160,
+    "hostile_tagged": 12,
+    "checker_scope": "count/hash/literal/DTO structure only; no candidate execution or acceptance"
+  },
+  "acceptance": false
+}

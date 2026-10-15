@@ -1,0 +1,70 @@
+{
+  "edition": "D5-author-001",
+  "origin": "original_synthetic",
+  "licence": "MIT",
+  "author_identity": {
+    "workspace_id": "0046",
+    "app_id": "0004",
+    "workspace_callsign": "0046_Codex_GPT-6_Sub_BOLT-R01_FixtureAuthor_D5",
+    "app_callsign": "0004_Codex_GPT-6_Sub_BOLT-R01_FixtureAuthor_D5",
+    "session_id": "01a13d41-3e1c-7991-bbbf-2318aedc484b",
+    "model": "GPT-6",
+    "basis": "runtime developer instruction; no variant exposed"
+  },
+  "source_readpins": [
+    {
+      "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\planning\\delivery\\D5\\FIXTURE-AUTHOR.SOURCE-SPEC.v1.md",
+      "sha256": "880b0d0f2511d9f3dcbc3efda255724b505219ceb9eba90e0a056d46c76ce565",
+      "scope": "SOURCE-ONLY normative spec/DTO; no linked/runtime/test/result/history grant"
+    },
+    {
+      "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\planning\\delivery\\D5\\FIXTURE-AUTHOR.PROPOSAL.v1.md",
+      "sha256": "a8cd001fc5aa9188f56e7c1e108bca3d07fb9c09b9c11bf9a6a648b35fd6de1c",
+      "scope": "SOURCE-ONLY normative spec/DTO; no linked/runtime/test/result/history grant"
+    },
+    {
+      "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\planning\\source-context\\00-shared-contract.md",
+      "sha256": "da2396c4e0e33c2cbf60ffc71a7c3900a15ff06f4352a9ea996cd0d60ea3bfaa",
+      "scope": "SOURCE-ONLY normative spec/DTO; no linked/runtime/test/result/history grant"
+    },
+    {
+      "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\planning\\source-context\\S05-changelog-upgrade-advisor.md",
+      "sha256": "9bbe5e27c8d46a149c8c39401a9ecfdf492c4a0f616c0f1ace63e7408d493ec0",
+      "scope": "SOURCE-ONLY normative spec/DTO; no linked/runtime/test/result/history grant"
+    },
+    {
+      "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\changelog-upgrade-advisor\\schemas\\cited\\source.schema.json",
+      "sha256": "f2f2fcf86e4edfaba6fb64561f85b0749788b656652438879b3e1f78794bd00a",
+      "scope": "SOURCE-ONLY normative spec/DTO; no linked/runtime/test/result/history grant"
+    },
+    {
+      "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\changelog-upgrade-advisor\\schemas\\cited\\finding.schema.json",
+      "sha256": "cd826a3dae13328804c3eab681e5b30dcfd1b4c5b0749dc45a9268199e13f32b",
+      "scope": "SOURCE-ONLY normative spec/DTO; no linked/runtime/test/result/history grant"
+    },
+    {
+      "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\changelog-upgrade-advisor\\schemas\\cited\\pointer.schema.json",
+      "sha256": "1bf8ef508a2cb9a207797867ca13908dc23bf76c9c30a715685cbd49aee512d1",
+      "scope": "SOURCE-ONLY normative spec/DTO; no linked/runtime/test/result/history grant"
+    }
+  ],
+  "normative_supplement": {
+    "path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\planning\\delivery\\D5\\FIXTURE-AUTHOR.NORMATIVE-CLARIFICATION.v1.md",
+    "sha256": "4dc57f6c1a964f62648ad456b3b46dce0e3d293e51876bfccc11b3ac9372721a",
+    "grant_path": "C:\\Users\\Roy Harden\\OneDrive\\PJ-OD\\Bolt.New\\changelog-upgrade-advisor\\planning\\delivery\\approvals\\D5-author-source-supplement-020.json",
+    "grant_sha256": "0f235a3c6ee0e6b1b5e35240b3c6029c866509bdb5d78b4a91183bbcf5106379",
+    "scope": "SOURCE-ONLY no linked expansion"
+  },
+  "source_allocation_sha256": "5cca1730d7bd00287d5ad7b3ce43b1d043e6785a5b1162e0f71f7c80f22ac19b",
+  "protocol_sha256": "fc14fbd709e28abfac1b3c293ed5ce52393ab9edf7369cb284a31c008d3a456c",
+  "allocated_before_labels_at": "2026-10-15T02:01:50.396253+00:00",
+  "labels": "provisional agent-authored seeded; not human Gold",
+  "independence": "fresh native history NONE; source-only allowed inputs; no candidate/runtime/tests/results/method feedback seen",
+  "limitations": [
+    "Synthetic source distributions do not establish performance on real releases.",
+    "Author count/hash/structural checks are not independent app review or release acceptance.",
+    "Source family ownership and split discipline are procedural, not a cryptographic guarantee of human label correctness.",
+    "No provider/model responses synthesized from labels.",
+    "Heldout source bodies, labels and generators remain private and ungranted."
+  ]
+}

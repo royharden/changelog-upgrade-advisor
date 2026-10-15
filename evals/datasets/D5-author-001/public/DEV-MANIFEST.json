@@ -1,0 +1,42 @@
+{
+  "edition": "D5-author-001",
+  "publication_started_at": "2026-10-15T02:14:47.412634+00:00",
+  "both_splits_sealed_at": "2026-10-15T02:14:47.385879+00:00",
+  "files": {
+    "dev/semantic.jsonl": "25558237ebf5b7fc61710ad246a27a0119b4423cdc68ddf6ee5f65023b9448c6",
+    "dev/advisory.jsonl": "5292172bf93ace829b915ab820de5a4c1dc32b48a885ad500a1c2e784c1c2c14",
+    "dev/boundaries.jsonl": "ca715229058591f49322e488d7c17b69ed7260147cd7fc49311bff891b12f706",
+    "dev/option-permutation-plan.json": "1910703080640de31d6242657171b28967769f2788df99503348fbe7d0af2177",
+    "dev/source-label-inventory.json": "9d6c1ec8ed482fb8261647450ac8adb1bb3678099af1f4cea3c20a6280165eef",
+    "public/LICENSE": "5bcb17fa097b5ee6f274d575edce7fc4ff272dc8302fdb606054f0e1f749e9e1"
+  },
+  "counts": {
+    "semantic": {
+      "dev": 60,
+      "heldout": 60,
+      "total": 120
+    },
+    "advisory": {
+      "dev": 20,
+      "heldout": 20,
+      "total": 40
+    },
+    "boundary": {
+      "separate": 40
+    },
+    "hostile": {
+      "dev": 6,
+      "heldout": 6,
+      "orthogonal": true
+    },
+    "option_orders": {
+      "representatives": 6,
+      "orders": 5,
+      "planned_trials": 30,
+      "additional_gold": 0
+    }
+  },
+  "immutable": true,
+  "labels_status": "provisional agent-authored seeded",
+  "no_heldout_bodies": true
+}
