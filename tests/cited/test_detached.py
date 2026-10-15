@@ -15,7 +15,7 @@ def test_detached_models_and_protocols_are_inert_and_relocatable(tmp_path):
     destination = namespace / "cited"
     destination.mkdir()
     source = root / "src" / "changelog_advisor" / "shared" / "cited"
-    for filename in ("__init__.py", "models.py", "registry.py", "schema.py"):
+    for filename in ("__init__.py", "models.py", "registry.py", "schema.py", "rowcanonical.py"):
         shutil.copyfile(source / filename, destination / filename)
     script = r"""
 import sys, json, os, socket, subprocess

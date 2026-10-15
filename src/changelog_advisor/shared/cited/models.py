@@ -1,13 +1,17 @@
 """Closed structural wire models. Validation is not source or semantic verification."""
 
+import base64
 import hashlib
 import json
 import re
+import unicodedata
+from decimal import Decimal
 from functools import reduce
 from operator import or_
 from typing import Annotated, Literal, Self
 
 from pydantic import (
+    AfterValidator,
     BaseModel,
     BeforeValidator,
     ConfigDict,
@@ -16,6 +20,15 @@ from pydantic import (
     Tag,
     TypeAdapter,
     model_validator,
+)
+
+from .rowcanonical import (
+    EVENT_QUOTE_BYTES,
+    POINTER_BYTES,
+    ROW_BYTES,
+    digest,
+    event_bytes,
+    metric_bytes,
 )
 
 
@@ -369,22 +382,380 @@ class ProductPointer(PointerBase):
         return self
 
 
+def _metric_identifier(value: str) -> str:
+    if (
+        unicodedata.normalize("NFC", value) != value
+        or value.strip() != value
+        or any(ord(char) < 32 or ord(char) == 127 for char in value)
+        or len(value.encode("utf8")) > 1024
+    ):
+        raise ValueError("invalid literal metric identifier")
+    return value
+
+
+def _decimal_string(value: str) -> str:
+    if re.fullmatch(r"-?(0|[1-9][0-9]{0,31})(\.[0-9]{1,8})?", value) is None:
+        raise ValueError("invalid canonical decimal string")
+    if (value.startswith("-") and Decimal(value) == 0) or ("." in value and value.endswith("0")):
+        raise ValueError("noncanonical decimal string")
+    return value
+
+
+def _integer_string(value: str) -> str:
+    if re.fullmatch(r"-?(0|[1-9][0-9]{0,299})", value) is None or value == "-0":
+        raise ValueError("invalid exact support integer")
+    return value
+
+
+MetricID = Annotated[str, Field(min_length=1, max_length=256), AfterValidator(_metric_identifier)]
+MetricField = Annotated[str, Field(min_length=1, max_length=256)]
+MetricIDs = Annotated[tuple[MetricID, ...], BeforeValidator(_array), Field(max_length=5000)]
+DatasetID = Annotated[
+    str, Field(pattern=r"^s9-dataset-[0-9a-f]{32}$", min_length=43, max_length=43)
+]
+CanonicalDecimal = Annotated[
+    str,
+    Field(min_length=1, max_length=43, pattern=r"^-?(0|[1-9][0-9]{0,31})(\.[0-9]{1,8})?$"),
+    AfterValidator(_decimal_string),
+]
+SupportInteger = Annotated[
+    str,
+    Field(min_length=1, max_length=301, pattern=r"^-?(0|[1-9][0-9]{0,299})$"),
+    AfterValidator(_integer_string),
+]
+Count = Annotated[int, Field(ge=0, le=5000)]
+MetricStatus = Literal["ok", "insufficient_data", "unavailable"]
+MetricReason = Literal[
+    "minimum_eligible_n_5",
+    "zero_eligible_impressions",
+    "arithmetic_out_of_range",
+    "missing_time",
+    "no_positive_impressions",
+]
+
+
+def _sorted_ids(values):
+    if tuple(sorted(set(values))) != values:
+        raise ValueError("contributor IDs must be sorted and distinct")
+
+
+class WindowSupport(WireModel):
+    start_ordinal: Annotated[int, Field(ge=1, le=3652059)]
+    end_ordinal: Annotated[int, Field(ge=1, le=3652059)]
+    eligible_source_ids: MetricIDs
+    cohort_source_ids: MetricIDs
+    n: Count
+    N: Count
+    numerator: SupportInteger
+    denominator: SupportInteger
+
+    @model_validator(mode="after")
+    def complete_window(self) -> Self:
+        _sorted_ids(self.eligible_source_ids)
+        _sorted_ids(self.cohort_source_ids)
+        if (
+            self.end_ordinal - self.start_ordinal != 27
+            or self.n != len(self.eligible_source_ids)
+            or self.N != len(self.cohort_source_ids)
+            or not set(self.eligible_source_ids).issubset(self.cohort_source_ids)
+            or int(self.denominator) < 0
+        ):
+            raise ValueError("window support identity/count mismatch")
+        return self
+
+
+class MetricSupport(WireModel):
+    """Whole retained producer support. A valid record can exceed citation byte caps."""
+
+    schema_version: Version = 1
+    metric_id: MetricField
+    snapshot_id: Digest
+    scope: MetricField
+    definition: Text
+    value: CanonicalDecimal | None
+    unit: Literal["ratio", "percentage_points"]
+    sample_size: Count
+    excluded_size: Count
+    computed_by: MetricField
+    status: MetricStatus
+    status_reason: MetricReason | None
+    n: Count
+    N: Count
+    cohort_semantics: Literal[
+        "rate_cohort", "trend_union", "diagnostic_single", "availability_empty"
+    ]
+    numerator: SupportInteger
+    denominator: SupportInteger
+    family: MetricField
+    dimension: MetricField
+    key: Annotated[str, Field(min_length=1, max_length=256)]
+    eligible_source_ids: MetricIDs
+    excluded_source_ids: MetricIDs
+    windows: Annotated[tuple[WindowSupport, ...], BeforeValidator(_array), Field(max_length=2)]
+
+    @model_validator(mode="after")
+    def complete_support(self) -> Self:
+        _sorted_ids(self.eligible_source_ids)
+        _sorted_ids(self.excluded_source_ids)
+        eligible, excluded = set(self.eligible_source_ids), set(self.excluded_source_ids)
+        if (
+            eligible & excluded
+            or self.n > self.N
+            or self.n != self.sample_size
+            or self.excluded_size != len(excluded)
+            or int(self.denominator) < 0
+        ):
+            raise ValueError("metric support count mismatch")
+        if self.status == "ok":
+            if (
+                self.value is None
+                or not self.sample_size
+                or self.status_reason is not None
+                or int(self.denominator) == 0
+            ):
+                raise ValueError("ok support requires value, sample and no reason")
+        elif self.status_reason is None or (
+            self.status == "unavailable" and self.value is not None
+        ):
+            raise ValueError("uncitable support requires exact status/reason/value")
+        if self.cohort_semantics == "trend_union":
+            if len(self.windows) != 2 or self.unit != "percentage_points":
+                raise ValueError("trend requires two ordered windows")
+            recent, prior = self.windows
+            cohorts = set(recent.cohort_source_ids) | set(prior.cohort_source_ids)
+            if (
+                prior.end_ordinal + 1 != recent.start_ordinal
+                or set(recent.cohort_source_ids) & set(prior.cohort_source_ids)
+                or eligible != set(recent.eligible_source_ids) | set(prior.eligible_source_ids)
+                or excluded != cohorts - eligible
+                or self.N != len(cohorts)
+                or self.n != min(recent.n, prior.n)
+                or int(self.numerator)
+                != 100
+                * (
+                    int(recent.numerator) * int(prior.denominator)
+                    - int(prior.numerator) * int(recent.denominator)
+                )
+                or int(self.denominator) != int(recent.denominator) * int(prior.denominator)
+            ):
+                raise ValueError("trend whole cohort/window support mismatch")
+        else:
+            if self.windows or self.unit != "ratio":
+                raise ValueError("nontrend windows/unit mismatch")
+            if self.cohort_semantics == "availability_empty":
+                if self.n or self.N or eligible:
+                    raise ValueError("availability cohort must be explicitly empty")
+            elif self.n != len(eligible) or self.N != len(eligible | excluded):
+                raise ValueError("whole cohort identity mismatch")
+            if self.cohort_semantics == "diagnostic_single" and self.n > 1:
+                raise ValueError("diagnostic has at most one contributor")
+        metric_bytes(self.model_dump(mode="json"))
+        return self
+
+
+class TagProvenance(WireModel):
+    schema_version: Version = 1
+    source_id: MetricID
+    field: Literal["topic", "format"]
+    value: Annotated[str, Field(min_length=1, max_length=16384)]
+    method: MetricID
+    model: MetricID | None = None
+    taxonomy_version: MetricID
+    threshold: CanonicalDecimal | None = None
+
+    @model_validator(mode="after")
+    def canonical_tag(self) -> Self:
+        if self.threshold is not None and not 0 <= Decimal(self.threshold) <= 1:
+            raise ValueError("threshold outside probability interval")
+        metric_bytes(self.model_dump(mode="json"))
+        return self
+
+
+class SnapshotIdentity(WireModel):
+    schema_version: Version = 1
+    identity_version: Literal["snapshot-identity.v1"] = "snapshot-identity.v1"
+    dataset_fingerprint: Digest
+    tag_provenance: Annotated[
+        tuple[TagProvenance, ...], BeforeValidator(_array), Field(max_length=10000)
+    ]
+    config_json: Annotated[str, Field(min_length=2, max_length=32768)]
+    compute_version: MetricID
+
+    @model_validator(mode="after")
+    def canonical_snapshot(self) -> Self:
+        from .rowcanonical import decode_retained
+
+        config = decode_retained(self.config_json.encode("utf8"), maximum=32768, metric=True)
+        if type(config) is not dict:
+            raise ValueError("snapshot config_json must encode an object")
+        keys = tuple((tag.source_id, tag.field) for tag in self.tag_provenance)
+        if keys != tuple(sorted(set(keys))):
+            raise ValueError("tag provenance must be sorted, unique and complete")
+        metric_bytes(self.model_dump(mode="json"))
+        return self
+
+
+class PlatformSummary(WireModel):
+    platform: MetricField
+    rows: Count
+    positive_impression_rows: Count
+    missing_time_rows: Count
+    eligible_hour_rows: Count
+    missing_topic_rows: Count
+    missing_format_rows: Count
+
+    @model_validator(mode="after")
+    def subordinate_counts(self) -> Self:
+        if (
+            any(
+                getattr(self, k) > self.rows
+                for k in type(self).model_fields
+                if k not in ("platform", "rows")
+            )
+            or self.eligible_hour_rows > self.positive_impression_rows
+        ):
+            raise ValueError("platform availability count mismatch")
+        return self
+
+
+class MetricArtifact(WireModel):
+    algorithm: Literal["s9-metric-evidence.v1"]
+    namespace_id: LogicalID
+    dataset_id: DatasetID
+    dataset_fingerprint: Digest
+    snapshot_id: Digest
+    snapshot_identity: SnapshotIdentity
+    rows: Annotated[tuple[MetricSupport, ...], BeforeValidator(_array), Field(max_length=10000)]
+    platform_summary: Annotated[
+        tuple[PlatformSummary, ...], BeforeValidator(_array), Field(max_length=5000)
+    ]
+
+    @model_validator(mode="after")
+    def complete_artifact(self) -> Self:
+        if (
+            self.dataset_fingerprint != self.snapshot_identity.dataset_fingerprint
+            or self.snapshot_id
+            != digest(metric_bytes(self.snapshot_identity.model_dump(mode="json")))
+            or any(row.snapshot_id != self.snapshot_id for row in self.rows)
+        ):
+            raise ValueError("snapshot/raw generation mismatch")
+        rowkeys = tuple(row.metric_id for row in self.rows)
+        platforms = tuple(row.platform for row in self.platform_summary)
+        if rowkeys != tuple(sorted(set(rowkeys))) or platforms != tuple(sorted(set(platforms))):
+            raise ValueError("artifact rows/platforms must be sorted and distinct")
+        if any(row.scope not in platforms for row in self.rows):
+            raise ValueError("metric lacks retained platform availability")
+        counts = {summary.platform: summary.rows for summary in self.platform_summary}
+        if any(row.N > counts[row.scope] for row in self.rows):
+            raise ValueError("metric cohort exceeds retained platform source count")
+        return self
+
+
+class EventLocator(QuoteLocator):
+    profile_version: Literal["s8-zeek-physical-row-v1"]
+    row_id: Annotated[str, Field(pattern=r"^[0-9a-f]{64}:[1-9][0-9]{0,7}$")]
+    physical_line_number: Annotated[int, Field(ge=1, le=10000000)]
+    processing_generation: Digest
+    event_record_sha256: Digest
+    quote: Text
+    excerpt_sha256: Digest
+
+    @model_validator(mode="after")
+    def physical_row(self) -> Self:
+        if "\n" in self.quote[:-1]:
+            raise ValueError("event quote must be exactly one physical LF row")
+        if len(self.quote.encode("utf8")) > EVENT_QUOTE_BYTES or self.row_id.rsplit(":", 1)[
+            1
+        ] != str(self.physical_line_number):
+            raise ValueError("event physical row identity/byte bound mismatch")
+        return self
+
+
+class MetricLocator(WireModel):
+    profile: Literal["s9-metric-row.v1"]
+    dataset_id: DatasetID
+    snapshot_id: Digest
+    row_sha256: Digest
+    metric_id: MetricField
+    scope: MetricField
+    expected: MetricSupport
+
+    @model_validator(mode="after")
+    def whole_expected_row(self) -> Self:
+        raw = metric_bytes(self.expected.model_dump(mode="json"))
+        if (
+            len(raw) > ROW_BYTES
+            or digest(raw) != self.row_sha256
+            or self.expected.metric_id != self.metric_id
+            or self.expected.scope != self.scope
+            or self.expected.snapshot_id != self.snapshot_id
+        ):
+            raise ValueError("metric expected whole row binding mismatch")
+        return self
+
+
 class EventPointer(PointerBase):
-    """Declared route only; owner row locator schema is not adopted in this slice."""
+    """Physical-row declaration; installed backend still checks access/currentness."""
 
     kind: Literal["row:id"]
     source_type: Literal["event_table"]
     locator_subtype: Literal["row"]
-    locator: None
+    locator: EventLocator | None
+
+    @model_validator(mode="after")
+    def raw_row_binding(self) -> Self:
+        if self.locator is not None:
+            if (
+                self.source_revision != f"sha256:{self.source_sha256}"
+                or self.locator.row_id
+                != f"{self.source_sha256}:{self.locator.physical_line_number}"
+            ):
+                raise ValueError("event raw row generation mismatch")
+            artifact = {
+                "algorithm": "s8-zeek-physical-row-evidence-v1",
+                "source_sha256": self.source_sha256,
+                "source_revision": self.source_revision,
+                "processing_generation": self.locator.processing_generation,
+                "row_id": self.locator.row_id,
+                "physical_line_number": self.locator.physical_line_number,
+                "event_record_sha256": self.locator.event_record_sha256,
+                "raw_line_base64": base64.b64encode(self.locator.quote.encode("utf8")).decode(
+                    "ascii"
+                ),
+            }
+            if digest(event_bytes(artifact)) != self.evidence_artifact_sha256:
+                raise ValueError("event artifact preimage mismatch")
+            wire = json.dumps(
+                self.model_dump(mode="json"),
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")
+            if len(wire) > POINTER_BYTES:
+                raise ValueError("event whole Pointer byte limit")
+        return self
 
 
 class MetricPointer(PointerBase):
-    """Declared route only; owner metric locator schema awaits an exact attachment."""
+    """Whole metric evidence declaration, never independent performance approval."""
 
     kind: Literal["row:id"]
     source_type: Literal["metric_table"]
     locator_subtype: Literal["metric"]
-    locator: None
+    locator: MetricLocator | None
+
+    @model_validator(mode="after")
+    def raw_dataset_binding(self) -> Self:
+        if self.locator is not None:
+            if (
+                self.source_id != self.locator.dataset_id
+                or self.source_revision != self.source_sha256
+            ):
+                raise ValueError("metric raw dataset generation mismatch")
+            if len(metric_bytes(self.model_dump(mode="json"))) > POINTER_BYTES:
+                raise ValueError("metric whole Pointer byte limit")
+        return self
 
 
 class FragmentPointer(PointerBase):
@@ -518,6 +889,47 @@ class Coverage(WireModel):
     profile_ref: ArtifactRef | None = None
 
 
+class RowProvenanceBase(WireModel):
+    namespace_id: LogicalID
+    source_id: LogicalID
+    source_sha256: Digest
+    artifact_sha256: Digest
+    generation_mode: Literal["current", "retained_historical"]
+    current: bool
+
+    @model_validator(mode="after")
+    def explicit_currentness(self) -> Self:
+        if self.current != (self.generation_mode == "current"):
+            raise ValueError("historical evidence cannot claim currentness")
+        return self
+
+
+class EventRowProvenance(RowProvenanceBase):
+    profile: Literal["s8-zeek-physical-row-v1"]
+    row_id: Annotated[str, Field(pattern=r"^[0-9a-f]{64}:[1-9][0-9]{0,7}$")]
+    physical_line_number: Annotated[int, Field(ge=1, le=10000000)]
+    event_record_sha256: Digest
+    processing_generation: Digest
+    parser_implementation_sha256: Digest
+    parser_runtime_sha256: Digest
+    parser_config_sha256: Digest
+    event_schema_sha256: Digest
+
+
+class MetricRowProvenance(RowProvenanceBase):
+    profile: Literal["s9-metric-row.v1"]
+    dataset_id: DatasetID
+    snapshot_id: Digest
+    row_sha256: Digest
+    config_sha256: Digest
+    tag_provenance_sha256: Digest
+    compute_version: MetricID
+    n: Count
+    N: Count
+    metric_status: MetricStatus
+    metric_status_reason: MetricReason | None
+
+
 class ResolutionProvenance(WireModel):
     geometry_provenance: Geometry | None = None
     ocr_confidence: Probability | None = None
@@ -525,6 +937,9 @@ class ResolutionProvenance(WireModel):
     view_kind: Literal["raw_source", "redacted_result"] | None = None
     coverage: Coverage | None = None
     profile_ref: ArtifactRef | None = None
+    row: (
+        Annotated[EventRowProvenance | MetricRowProvenance, Field(discriminator="profile")] | None
+    ) = None
 
 
 class Resolution(WireModel):
@@ -581,3 +996,4 @@ class ResolutionContext(WireModel):
     access_policy_ref: ArtifactRef
     generation_policy_ref: ArtifactRef
     required_scope: Literal["text", "spatial", "text_and_spatial"] | None = None
+    generation_mode: Literal["current", "retained_historical"] = "current"

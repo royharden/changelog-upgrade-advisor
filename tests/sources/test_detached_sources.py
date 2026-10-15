@@ -23,6 +23,7 @@ def test_detached_parser_and_optional_source_bridge(tmp_path):
             "sources.py",
         ),
         "cited": (
+            "rowcanonical.py",
             "__init__.py",
             "models.py",
             "registry.py",

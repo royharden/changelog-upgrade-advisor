@@ -17,6 +17,7 @@ def test_actual_detached_memory_consumer_requires_no_node_or_owner_app(tmp_path)
     for name in (
         "__init__.py",
         "models.py",
+        "rowcanonical.py",
         "registry.py",
         "schema.py",
         "memory.py",

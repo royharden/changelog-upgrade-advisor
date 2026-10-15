@@ -39,6 +39,15 @@
     "access_policy_ref": {
       "$ref": "#/$defs/ArtifactRef"
     },
+    "generation_mode": {
+      "default": "current",
+      "enum": [
+        "current",
+        "retained_historical"
+      ],
+      "title": "Generation Mode",
+      "type": "string"
+    },
     "generation_policy_ref": {
       "$ref": "#/$defs/ArtifactRef"
     },
