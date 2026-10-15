@@ -40,8 +40,10 @@ is maintained. It does not fetch records, run npm, decide membership or judge us
 
 Normalize supplied immutable bytes with `normalize_osv` or `normalize_ghsa`, then
 call `AdvisorySource.from_record(record,namespace_id=...)`. It re-normalizes the
-original raw bytes and compares every derived field; a forged summary, details,
-identity, origin or raw hash cannot substitute for the canonical record. Each
+original raw bytes and compares the canonical derived fields; a forged summary,
+details, identity or raw hash cannot substitute for the canonical record.
+Unsupported origin labels are refused. Accepted `synthetic`/`saved_response`
+labels are caller-declared provenance, not authenticated by these bytes. Each
 source uses id `advisory-<source>-<raw SHA256>` and revision `sha256:<raw SHA256>`.
 The unchanged advisory-summary-details/1 projection is sorted compact UTF-8 JSON,
 ensure_ascii=false, without trailing newline, of `{profile,source,id,raw_sha256,text}`;
