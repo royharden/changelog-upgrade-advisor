@@ -833,6 +833,45 @@ class LineMapping(WireModel):
 class SourceArtifact(WireModel):
     """Declared source metadata, not an acquisition or normalization implementation."""
 
+    # Export existing text_metadata constraints for structural-schema consumers.
+    # Content identity and ordered/unique line mappings still require runtime validation.
+    model_config = ConfigDict(
+        json_schema_extra={
+            "allOf": [
+                {
+                    "anyOf": [
+                        {
+                            "properties": {
+                                "canonical_text_sha256": {"type": "null"},
+                                "newline_policy": {"type": "null"},
+                            }
+                        },
+                        {
+                            "required": ["canonical_text_sha256", "newline_policy"],
+                            "properties": {
+                                "canonical_text_sha256": {"type": "string"},
+                                "newline_policy": {"type": "string"},
+                            },
+                        },
+                    ]
+                },
+                {
+                    "if": {
+                        "required": ["line_map"],
+                        "properties": {"line_map": {"minItems": 1}},
+                    },
+                    "then": {
+                        "required": ["canonical_text_sha256", "newline_policy"],
+                        "properties": {
+                            "canonical_text_sha256": {"type": "string"},
+                            "newline_policy": {"type": "string"},
+                        },
+                    },
+                },
+            ]
+        }
+    )
+
     schema_version: Version = 1
     source_id: LogicalID
     source_type: LogicalID

@@ -25,6 +25,62 @@
     }
   },
   "additionalProperties": false,
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "canonical_text_sha256": {
+              "type": "null"
+            },
+            "newline_policy": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "canonical_text_sha256": {
+              "type": "string"
+            },
+            "newline_policy": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "canonical_text_sha256",
+            "newline_policy"
+          ]
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": {
+          "line_map": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "line_map"
+        ]
+      },
+      "then": {
+        "properties": {
+          "canonical_text_sha256": {
+            "type": "string"
+          },
+          "newline_policy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "canonical_text_sha256",
+          "newline_policy"
+        ]
+      }
+    }
+  ],
   "description": "Declared source metadata, not an acquisition or normalization implementation.",
   "properties": {
     "canonical_text_sha256": {
