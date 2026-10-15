@@ -309,3 +309,54 @@ def test_stdin_bundle_is_bounded_and_runs_same_pipeline(npm, monkeypatch, tmp_pa
     assert main(["analyze", "--bundle", "-", "--out", str(tmp_path / "invalid")]) == 2
     assert json.loads(capsys.readouterr().out)["status"] == "refused"
     assert not (tmp_path / "invalid").exists()
+
+
+@pytest.mark.parametrize("target, expected", [("1.1.0", "affected"), ("2.0.0", "not\\_affected")])
+def test_markdown_advisory_target_and_resolved_source_evidence(npm, target, expected):
+    """what_bug_this_catches: Markdown hides target risk or a resolved advisory citation."""
+    original = bundle().model_dump(mode="json")
+    original["packages"][0]["target"] = target
+    got = analyze_bundle(read_bundle(json.dumps(original).encode()), runtime=npm)
+    advisory = got["packages"][0]["advisories"]["rows"][0]
+    markdown = render_markdown(got)
+    assert f"installed membership affected; target membership {expected};" in markdown
+    assert "Evidence: required 1; resolved 1" in markdown
+    assert "> Unbounded nesting in flatten input" in markdown
+    assert advisory["source_records"][0]["sha256"] in markdown
+    assert advisory["evidence"][0]["pointer"]["source_id"].replace("-", "\\-") in markdown
+    assert "Resolution: resolved; reason literal\\_quote\\_resolved" in markdown
+
+
+def test_markdown_advisory_unresolvable_quote_retains_unsupported_state(npm, monkeypatch):
+    """what_bug_this_catches: a membership row hides its invalid quote and evidence deficit."""
+    from changelog_advisor import pipeline
+
+    original_pointer = pipeline.AdvisoryPointer
+
+    def invalid_quote(**kwargs):
+        pointer = original_pointer(**kwargs)
+        return pointer.model_copy(
+            update={
+                "locator": pointer.locator.model_copy(
+                    update={
+                        "quote": "absent <script>quote</script>",
+                        "excerpt_sha256": hashlib.sha256(
+                            b"absent <script>quote</script>"
+                        ).hexdigest(),
+                    }
+                )
+            }
+        )
+
+    monkeypatch.setattr(pipeline, "AdvisoryPointer", invalid_quote)
+    got = analyze_bundle(bundle(), runtime=npm)
+    advisory = got["packages"][0]["advisories"]["rows"][0]
+    assert got["workflow_status"] == "partial" and got["counts"]["advisory_records"] == 2
+    assert advisory["status"] == "unsupported"
+    assert advisory["required_evidence_count"] == 1 and advisory["resolved_evidence_count"] == 0
+    markdown = render_markdown(got)
+    assert "Status: unsupported" in markdown
+    assert "Evidence: required 1; resolved 0" in markdown
+    assert "Resolution: invalid; reason literal\\_quote\\_mismatch" in markdown
+    assert "&lt;script&gt;" in markdown and "<script>" not in markdown
+    assert advisory["source_records"][0]["sha256"] in markdown

@@ -27,3 +27,6 @@
   quote/hash schema rejection alone does not exercise literal source resolution.
 - Keep demo commands in CI synchronized with CLI output-directory requirements.
   Test a complete copied source closure, including the npm helper and assets.
+- Verify each standalone report format against the same advisory evidence:
+  installed/target membership, source identity, quote resolution and missing counts
+  must remain visible without opening another artifact.

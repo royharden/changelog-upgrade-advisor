@@ -77,12 +77,57 @@ def render_markdown(report):
             lines += [
                 "- Advisory "
                 + md(", ".join(advisory.get("ids", [])))
-                + ": membership "
+                + ": installed membership "
                 + md(advisory["membership"])
+                + "; target membership "
+                + md(advisory.get("target_membership", "unknown"))
                 + "; conditional usage "
                 + md(advisory["usage_impact"]),
                 "",
+                "  Status: " + md(advisory.get("status", "unknown")),
+                "  Membership reason: " + md(advisory.get("membership_reason", "unknown")),
+                "  Usage reason: "
+                + md(advisory.get("usage_reason", advisory.get("reason", "unknown"))),
+                "  Evidence: required "
+                + md(advisory.get("required_evidence_count", "unknown"))
+                + "; resolved "
+                + md(advisory.get("resolved_evidence_count", "unknown")),
+                "",
             ]
+            for source in advisory.get("source_records", []):
+                lines += [
+                    "  Source: "
+                    + md(source.get("source", "unknown"))
+                    + "; id "
+                    + md(source.get("id", "unknown"))
+                    + "; SHA256 "
+                    + md(source.get("sha256", "unknown")),
+                    "",
+                ]
+            evidence = advisory.get("evidence", [])
+            if not evidence:
+                lines += ["  Evidence unavailable; no resolved quote supplied.", ""]
+            for item in evidence:
+                pointer = item.get("pointer", {})
+                resolution = item.get("resolution", {})
+                lines += [
+                    "  Citation source: "
+                    + md(pointer.get("source_id", "unknown"))
+                    + "; SHA256 "
+                    + md(pointer.get("source_sha256", "unknown")),
+                    "  Resolution: "
+                    + md(resolution.get("status", "unsupported"))
+                    + "; reason "
+                    + md(resolution.get("reason", "unknown")),
+                    "",
+                ]
+                quote = resolution.get("excerpt") or pointer.get("locator", {}).get("quote")
+                if quote:
+                    if resolution.get("status") != "resolved":
+                        lines += ["  Unresolved quoted claim:", ""]
+                    lines += ["> " + md(line) for line in quote.splitlines()] + [""]
+                else:
+                    lines += ["  Quote unavailable; evidence remains unresolved.", ""]
     lines += ["## Limits", ""] + ["- " + md(value) for value in report["limitations"]]
     return "\n".join(lines) + "\n"
 
