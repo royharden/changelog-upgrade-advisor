@@ -62,6 +62,11 @@ The optional `shared/cited/fragments.py` export resolves explicit saved-text
 anchor maps with caller-owned access/current-generation policies. It performs
 no URL acquisition or HTML extraction. See [the cited contract](docs/CITED.md).
 
+The app's retained advisory citation adapter is reusable as
+`shared/versions/evidence.py`. It validates canonical raw/derived OSV and GHSA
+records with explicit access/current-source policies. Citation fidelity remains
+separate from membership and conditional usage; see [the advisory contract](docs/advisories.md).
+
 The local source closure has a detached normal/refusal CLI control with its own
 pinned npm dependency. It does not import the original checkout or live SDKs.
 Published wheels and a hosted analysis service have not been qualified.

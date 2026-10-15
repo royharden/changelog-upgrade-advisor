@@ -17,12 +17,16 @@ from .shared.cited.models import (
     AdvisoryLocator,
     AdvisoryPointer,
     MethodRef,
-    Resolution,
-    SourceArtifact,
     WireModel,
 )
 from .shared.versions.advisories import Membership, deduplicate, group_membership
 from .shared.versions.changelog import parse_changelog, select_spans
+from .shared.versions.evidence import (
+    AdvisoryRecordResolver,
+    AdvisorySource,
+    advisory_source_id,
+    install_advisory_records,
+)
 from .shared.versions.ghsa import normalize_ghsa
 from .shared.versions.lockfile import Lockfile
 from .shared.versions.manifest import read_manifest, select_declarations
@@ -148,84 +152,15 @@ def source_context(namespace, metadata):
     return policy, context
 
 
-def _record_projection(record):
-    return {
-        "profile": "advisory-summary-details/1",
-        "source": record.source,
-        "id": record.id,
-        "raw_sha256": record.sha256,
-        "text": record.summary + "\n" + record.details,
-    }
-
-
-def _advisory_id(record):
-    return "advisory-" + record.source + "-" + record.sha256
-
-
-class SuppliedAdvisoryResolver:
-    """App-only retained record-ID/text projection; no fetching or authenticity claim."""
-
-    def __init__(self, records, policy):
-        self.records = {_advisory_id(r): r for r in records}
-        self.policy = policy
-
-    def resolve(self, pointer, context):
-        if (
-            context.access_policy_ref != self.policy.reference
-            or context.generation_policy_ref != self.policy.reference
-            or self.policy.decision(context.namespace_id, pointer.source_id) != "allow"
-        ):
-            return Resolution(status="unsupported", reason="access_not_allowed")
-        record = self.records.get(pointer.source_id)
-        metadata = self.policy.current(context.namespace_id, pointer.source_id)
-        if record is None or metadata is None:
-            return Resolution(status="missing", reason="source_not_retained")
-        projection = _record_projection(record)
-        if (
-            sha(record.raw) != record.sha256
-            or record.sha256 != pointer.source_sha256
-            or pointer.source_revision != metadata.source_revision
-            or pointer.evidence_artifact_sha256 != canonical_digest(projection)
-        ):
-            return Resolution(status="stale", reason="source_identity_changed")
-        quote = pointer.locator.quote
-        if (
-            pointer.locator.advisory_id != record.id
-            or not quote
-            or quote not in projection["text"]
-            or pointer.locator.excerpt_sha256 != sha(quote.encode("utf8"))
-        ):
-            return Resolution(status="invalid", reason="literal_quote_mismatch")
-        if self.policy.decision(context.namespace_id, pointer.source_id) != "allow":
-            return Resolution(status="unsupported", reason="access_not_allowed")
-        return Resolution(
-            status="resolved",
-            reason="literal_quote_resolved",
-            scope="text",
-            checked_source_sha256=record.sha256,
-            checked_source_revision=metadata.source_revision,
-            checked_artifact_sha256=canonical_digest(projection),
-            excerpt=quote,
-            excerpt_sha256=sha(quote.encode("utf8")),
-        )
-
-
 def advisory_evidence(records, namespace):
-    metadata = tuple(
-        SourceArtifact(
-            source_id=_advisory_id(r),
-            source_type="advisory_record",
-            source_sha256=r.sha256,
-            source_revision="sha256:" + r.sha256,
-            evidence_artifact_sha256=canonical_digest(_record_projection(r)),
-            raw_byte_length=len(r.raw),
-        )
-        for r in records
+    sources = tuple(
+        AdvisorySource.from_record(record, namespace_id=namespace) for record in records
     )
+    metadata = tuple(source.metadata for source in sources)
     policy, context = source_context(namespace, metadata)
     registry = Registry()
-    registry.register(
-        ("advisory:id", "advisory_record", "id"), SuppliedAdvisoryResolver(records, policy)
+    install_advisory_records(
+        registry, AdvisoryRecordResolver(sources, access=policy, generation=policy)
     )
     return registry, context, {m.source_id: m for m in metadata}
 
@@ -283,7 +218,7 @@ def _advisories(data, package, pin, target, runtime, origin, namespace):
         )
         evidence = []
         for record in group.records:
-            m = metadata[_advisory_id(record)]
+            m = metadata[advisory_source_id(record)]
             quote = record.summary or record.details
             try:
                 pointer = AdvisoryPointer(

@@ -33,3 +33,6 @@
 - Keep saved-text anchor maps in the evidence artifact identity. Equal raw bytes
   do not permit a changed fragment window, namespace or projection to reuse a
   citation. Reuse the canonical text/line machinery rather than parsing it twice.
+- Export the same advisory adapter that the application consumes. Re-normalize
+  retained raw records before trusting a derived quote, and keep citation fidelity,
+  deterministic membership and conditional usage as separate results.
