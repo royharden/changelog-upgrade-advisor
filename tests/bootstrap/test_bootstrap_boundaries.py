@@ -19,7 +19,7 @@ def test_status_does_not_access_external_state(monkeypatch, capsys):
     monkeypatch.setattr(subprocess, "run", forbidden)
     assert main(["status"]) == 0
     output = json.loads(capsys.readouterr().out)
-    assert output["analysis_available"] is False
+    assert output["analysis_available"] is True
     assert output["provider_calls"] == 0
     assert "findings" not in output
 

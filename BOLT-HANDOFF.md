@@ -1,23 +1,52 @@
-# Changelog Upgrade Advisor — infrastructure inventory
+# Bolt infrastructure handoff
 
-Status: local foundation checkpoint; no hosted workflow ready to import. Current code includes status, cited models/schemas and explicit supplied-memory resolvers, plus npm pin/window functions. No manifest-to-checklist application exists yet. Python 3.12/uv and the pinned Node semver runtime require local execution; Bolt does not provision this local core.
+The implemented target is a local Python/Node CLI and standalone static report.
+Database: **none**. Bolt action: **inspect and prepare only**. No publication or
+infrastructure provisioning has occurred. The offline normal/refusal workflow
+runs locally; live integrations and independent finished-app acceptance are pending.
 
-| Resource | Current requirement / evidence |
+| Component | Actual inventory |
 |---|---|
-| Database / migrations | Not required; none implemented |
-| Edge functions / auth / storage / Realtime | Not required; none implemented |
-| Browser secrets | None |
-| Provider calls / server secrets | Not implemented in W0; later local controllers only |
-| Hosted viewer | Not implemented; optional future static viewer deferred |
-| Docker / listeners | Not required for bootstrap |
-| Build/install | uv sync --frozen; npm ci --ignore-scripts |
-| Local command | uv run advisor status |
-| Offline scaffold | uv run python scripts/demo.py --mode offline |
-| Structural models | shared/cited; Pydantic v2 dependency; zero installed concrete resolvers |
-| Explicit library adapters | supplied-memory line/section only, trusted policies required; default/app registry still empty |
-| Version core | shared/versions; one packaged npm helper and root forwarding entry; no Python comparator |
-| Schema export | uv run python -m changelog_advisor.shared.cited.schema --out schemas/cited |
-| Verification | ruff + pytest + staged secret guard; actual receipts kept outside the repo |
-| Publication / GitHub import | Separate owner grant; no remote/provision/publication action taken |
+| Source root | This repository root; `main`, current local candidate |
+| Analysis | Python 3.12; `uv sync --frozen` |
+| Version authority | Node 22+; `npm ci --ignore-scripts`; semver 7.8.5 |
+| Commands | `advisor status`, `advisor analyze`, `advisor demo` |
+| Static output | `checklist.html`, `checklist.json`, `checklist.md` |
+| Input | Explicit bounded file/stdin bundle; saved snapshots only |
+| Hosted frontend | No React/Vite viewer implemented |
+| Database / migrations / auth / storage / functions / Realtime | Not required |
+| SDKs / API keys | Not needed for offline workflow; live path unqualified |
+| Services / Docker / listeners | None required |
+| Hosting / publication | Unprovisioned and unverified |
 
-Future inspection prompt: inspect the implemented inventory and local-runtime boundary before choosing a hosted component. Do not provision databases/functions/auth or claim Python analysis runs in Bolt merely from importing these files. No provisioning recipe is ready at this checkpoint.
+Reproduce from a source checkout:
+
+```sh
+uv sync --frozen
+npm ci --ignore-scripts
+uv run advisor demo --out out/normal
+uv run advisor demo --refusal --out out/refusal
+uv run --frozen --offline ruff check .
+uv run --frozen --offline ruff format --check .
+uv run --frozen --offline pytest tests vendor --junitxml=junit-local.xml
+```
+
+The normal CLI generates all three reports; the refusal CLI returns exit 3 and
+retains unknown advisories and incomplete coverage. Output directories must be
+new. Local controls cover malformed input, literal quote downgrade, escaping,
+overwrite refusal and an actual detached normal/refusal source closure.
+CI execution, wheel installation and live-model quality remain unverified.
+
+Importing this repo into Bolt does not execute or provision Python. A hosted
+analysis endpoint or interactive viewer needs separate design and backend
+verification. No duplicate TypeScript engine or browser secrets are present.
+Remaining product gaps are listed in `docs/LIMITATIONS.md`.
+
+Future inspection prompt:
+
+> Read BOLT-HANDOFF.md and inspect the actual imported source. This is a local
+> Python/Node CLI with generated standalone HTML, JSON and Markdown. If a completed
+> checklist.html is supplied, prepare a static presentation with no external assets.
+> Keep the documented source/runtime boundaries and report any unsupported runtime.
+> No database, auth, migrations, functions or provider secrets are required for the
+> static report. Record the actual hosting/build verification before publication.

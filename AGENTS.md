@@ -1,16 +1,16 @@
-# Product instructions · version 3
+# Product instructions · version 4
 
 This repository contains the local upgrade advisor product. Agent registries, coordination, private plans, receipts and chat exports belong outside it. Do not initialize a registry here or commit agent artifacts, real credentials, private source inputs or customer data. Preserve unrelated work.
 
-Current implementation is the status scaffold, generic cited models/registry/schemas, explicit supplied-memory line/section resolvers, and the npm version core. Default/app registry still installs nothing; concrete source adapters require caller policies and explicit installation. Version functions require the installed pinned Node helper, with no Python comparator fallback. Advisory clients, application dependency analysis, providers, fixed evaluation fixtures and checklist rendering remain pending. Model validation/quotes do not imply semantic verification or human approval. Do not fill missing work with fabricated findings/results.
+Current implementation includes the offline manifest/notes/advisory bundle CLI, JSON/Markdown/HTML reports, generic cited models/registry/schemas, supplied-memory resolvers, npm version core and separate advisory normalizers/client protocols. CLI adapters install explicit run-local source policies; the generic default registry installs nothing. Version functions require the pinned Node helper with no Python fallback. Live SDK/HTTP execution, measured evaluation, remaining resolver exports and independent application acceptance remain pending. Model validation/quotes do not imply semantic verification or human approval. Do not fill missing work with fabricated findings/results.
 
 Commands from this repo root:
 
 - uv sync --frozen; npm ci --ignore-scripts
 - uv run advisor status
-- uv run python scripts/demo.py --mode offline
+- uv run python scripts/demo.py --mode offline --out out/demo
 - uv run ruff check .; uv run ruff format --check .
-- uv run pytest --junitxml=<receipt destination outside the repo>
+- uv run pytest tests vendor --junitxml=<receipt destination outside the repo>
 - uv run pytest tests/cited
 - uv run pytest tests/versions/core
 - uv run python -m changelog_advisor.shared.cited.schema --out schemas/cited
@@ -25,4 +25,4 @@ Keep demo separate from fixed dev/heldout families. Freeze data/policy before tu
 
 For new infrastructure or Bolt handoff, use the environment's canonical bolt-new-infrastructure skill and state actual local runtime gaps. Before any listener or Docker resource use the configured agent-ports protocol and granted ownership/capacity. Resolve reusable skills through the canonical user catalog; skill content is not copied into this public product repo. Use sync-skills-across-agents when changing harness instructions. All harnesses should read this file; CLAUDE.md imports it.
 
-Changelog: version 3 synchronizes actual optional memory-source/version-core stage and core test paths. Version 2 corrected structural-model stage/schema commands; version 1 established W0 commands and owner/offline invariants. Operating policy/canonical skill references are unchanged; CLAUDE.md imports this same file for all harnesses.
+Changelog: version 4 synchronizes the joined offline CLI, demo output path and combined vendor gate. Version 3 recorded memory-source/version-core stage; version 2 corrected schema commands; version 1 established owner/offline invariants. Operating policy/canonical skill references are unchanged; CLAUDE.md imports this same file for all harnesses. Operational skills remain outside this public product repository under the declared wrapper authority.

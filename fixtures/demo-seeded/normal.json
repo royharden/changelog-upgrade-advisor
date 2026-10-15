@@ -1,0 +1,67 @@
+{
+  "edition": "s5-supplied-bundle/1",
+  "origin": "synthetic",
+  "manifest_json": "{\n  \"name\": \"synthetic-upgrade-demo\",\n  \"private\": true,\n  \"dependencies\": {\n    \"demo-vector\": \"^1.0.0\",\n    \"demo-router\": \"^1.0.0\",\n    \"demo-cache\": \"^1.0.0\",\n    \"demo-mapper\": \"^1.0.0\",\n    \"demo-render\": \"^1.0.0\"\n  }\n}",
+  "lock_json": "{\n  \"lockfileVersion\": 3,\n  \"packages\": {\n    \"\": {\n      \"name\": \"synthetic-upgrade-demo\"\n    },\n    \"node_modules/demo-vector\": {\n      \"version\": \"1.0.0\"\n    },\n    \"node_modules/demo-router\": {\n      \"version\": \"1.0.0\"\n    },\n    \"node_modules/demo-cache\": {\n      \"version\": \"1.0.0\"\n    },\n    \"node_modules/demo-mapper\": {\n      \"version\": \"1.0.0\"\n    },\n    \"node_modules/demo-render\": {\n      \"version\": \"1.0.0\"\n    }\n  }\n}",
+  "packages": [
+    {
+      "name": "demo-vector",
+      "target": "latest",
+      "registry_json": "{\"name\": \"demo-vector\", \"versions\": {\"1.0.0\": {\"name\": \"demo-vector\", \"version\": \"1.0.0\"}, \"1.1.0\": {\"name\": \"demo-vector\", \"version\": \"1.1.0\"}, \"2.0.0\": {\"name\": \"demo-vector\", \"version\": \"2.0.0\"}}, \"dist-tags\": {\"latest\": \"2.0.0\"}}",
+      "notes": "# Release notes\r\n\r\n## 2.0.0\r\n- Removed public flatten(); callers must use flattenDeep().\r\n\r\n## 1.1.0\r\n- Added an optional vector label.\r\n\r\n## 1.0.0\r\n- Initial supported API.\r\n",
+      "usage_snippet": "flatten(values)",
+      "advisories": {
+        "osv": [
+          "{\"schema_version\": \"1.6.0\", \"id\": \"OSV-DEMO-0001\", \"modified\": \"2026-10-14T00:00:00Z\", \"summary\": \"Unbounded nesting in flatten input\", \"details\": \"The supplied flatten input path can consume excessive resources. This is synthetic demo data.\", \"affected\": [{\"package\": {\"ecosystem\": \"npm\", \"name\": \"demo-vector\"}, \"ranges\": [{\"type\": \"SEMVER\", \"events\": [{\"introduced\": \"0\"}, {\"fixed\": \"2.0.0\"}]}]}]}"
+        ],
+        "ghsa": []
+      }
+    },
+    {
+      "name": "demo-router",
+      "target": "latest",
+      "registry_json": "{\"name\": \"demo-router\", \"versions\": {\"1.0.0\": {\"name\": \"demo-router\", \"version\": \"1.0.0\"}, \"1.1.0\": {\"name\": \"demo-router\", \"version\": \"1.1.0\"}, \"2.0.0\": {\"name\": \"demo-router\", \"version\": \"2.0.0\"}}, \"dist-tags\": {\"latest\": \"2.0.0\"}}",
+      "notes": "# Release notes\r\n\r\n## 2.0.0\r\n- Renamed public route() to navigate().\r\n\r\n## 1.1.0\r\n- Deprecated legacyRoute(); it remains supported.\r\n\r\n## 1.0.0\r\n- Initial supported API.\r\n",
+      "usage_snippet": null,
+      "advisories": {
+        "osv": [],
+        "ghsa": []
+      }
+    },
+    {
+      "name": "demo-cache",
+      "target": "latest",
+      "registry_json": "{\"name\": \"demo-cache\", \"versions\": {\"1.0.0\": {\"name\": \"demo-cache\", \"version\": \"1.0.0\"}, \"1.1.0\": {\"name\": \"demo-cache\", \"version\": \"1.1.0\"}, \"2.0.0\": {\"name\": \"demo-cache\", \"version\": \"2.0.0\"}}, \"dist-tags\": {\"latest\": \"2.0.0\"}}",
+      "notes": "# Release notes\r\n\r\n## 2.0.0\r\n- Changed the default TTL from 30 to 60 seconds.\r\n\r\n## 1.1.0\r\n- Removed an internal benchmarking helper.\r\n\r\n## 1.0.0\r\n- Initial supported API.\r\n",
+      "usage_snippet": null,
+      "advisories": {
+        "osv": [],
+        "ghsa": [
+          "{\"ghsa_id\": \"GHSA-demo-cach-0001\", \"updated_at\": \"2026-10-14T00:00:00Z\", \"summary\": \"Old cache parser advisory (outside installed range)\", \"description\": \"Only older cache parser versions are affected. This is synthetic demo data.\", \"vulnerabilities\": [{\"package\": {\"ecosystem\": \"npm\", \"name\": \"demo-cache\"}, \"vulnerable_version_range\": \">=0.5.0, <1.0.0\", \"first_patched_version\": \"1.0.0\"}]}"
+        ]
+      }
+    },
+    {
+      "name": "demo-mapper",
+      "target": "latest",
+      "registry_json": "{\"name\": \"demo-mapper\", \"versions\": {\"1.0.0\": {\"name\": \"demo-mapper\", \"version\": \"1.0.0\"}, \"1.1.0\": {\"name\": \"demo-mapper\", \"version\": \"1.1.0\"}, \"2.0.0\": {\"name\": \"demo-mapper\", \"version\": \"2.0.0\"}}, \"dist-tags\": {\"latest\": \"2.0.0\"}}",
+      "notes": "# Release notes\r\n\r\n## 2.0.0\r\n- Calls now yield deferred handles instead of immediate values.\r\n\r\n## 1.1.0\r\n- Added an optional mapper label.\r\n\r\n## 1.0.0\r\n- Initial supported API.\r\n",
+      "usage_snippet": null,
+      "advisories": {
+        "osv": [],
+        "ghsa": []
+      }
+    },
+    {
+      "name": "demo-render",
+      "target": "latest",
+      "registry_json": "{\"name\": \"demo-render\", \"versions\": {\"1.0.0\": {\"name\": \"demo-render\", \"version\": \"1.0.0\"}, \"1.1.0\": {\"name\": \"demo-render\", \"version\": \"1.1.0\"}, \"2.0.0\": {\"name\": \"demo-render\", \"version\": \"2.0.0\"}}, \"dist-tags\": {\"latest\": \"2.0.0\"}}",
+      "notes": "# Release notes\r\n\r\n## 2.0.0\r\n- Keep <script>alert('demo')</script> examples literal in documentation.\r\n\r\n## 1.1.0\r\n- Improved documentation for existing callers.\r\n\r\n## 1.0.0\r\n- Initial supported API.\r\n",
+      "usage_snippet": null,
+      "advisories": {
+        "osv": [],
+        "ghsa": []
+      }
+    }
+  ]
+}
