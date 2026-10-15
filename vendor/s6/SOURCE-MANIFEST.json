@@ -1,0 +1,112 @@
+{
+  "source_commit": "8f8bb88ffc4148611dd6180b6f01d264c367cce3",
+  "source_tree": "8fda4a904a6eeeb6badcd06af5d0ce067f35cdfb",
+  "publication_sha256": "53a76b4dc318c62fc2e31f23435c210c8b32d031be8e24f19ed83f8ea98b8e09",
+  "entries": [
+    {
+      "source": "contracts/screen/README.md",
+      "target": "vendor/s6/contracts/screen/README.md",
+      "source_git_blob": "f870d23124f068a573326e6232653184277431a6",
+      "source_sha256": "6cfab6bf40465458763a307b66a8ba6e0bc754e3c4389f396985f5259703aaa4",
+      "bytes": 7844,
+      "kind": "publicdocsandtestsonly",
+      "actual_target_sha256": "6cfab6bf40465458763a307b66a8ba6e0bc754e3c4389f396985f5259703aaa4"
+    },
+    {
+      "source": "src/issue_triage/shared/screen/__init__.py",
+      "target": "src/changelog_advisor/shared/screen/__init__.py",
+      "source_git_blob": "0b1c299659558c561bba53118a64031020aae62e",
+      "source_sha256": "847da0a534d478e8be45e2de1eef47613bc3f1058ed85e6b5c5f9e99b222e42b",
+      "bytes": 788,
+      "kind": "exactruntimeunchanged",
+      "actual_target_sha256": "847da0a534d478e8be45e2de1eef47613bc3f1058ed85e6b5c5f9e99b222e42b"
+    },
+    {
+      "source": "src/issue_triage/shared/screen/models.py",
+      "target": "src/changelog_advisor/shared/screen/models.py",
+      "source_git_blob": "891d6491df803b945aecd30cfe887d546ee5306c",
+      "source_sha256": "1d33ba786df2cdbd81bd944ad69c11108d220fa268eca4960b4c51dcf1bab252",
+      "bytes": 11342,
+      "kind": "exactruntimeunchanged",
+      "actual_target_sha256": "1d33ba786df2cdbd81bd944ad69c11108d220fa268eca4960b4c51dcf1bab252"
+    },
+    {
+      "source": "src/issue_triage/shared/screen/prepare.py",
+      "target": "src/changelog_advisor/shared/screen/prepare.py",
+      "source_git_blob": "0c09c41c7a235926054a953ab3062ccbf8c71b66",
+      "source_sha256": "955e21a840cf00e56b7d431e3d0cf5aa2a5cd66de3e61433a054f31249bdb9dc",
+      "bytes": 5389,
+      "kind": "exactruntimeunchanged",
+      "actual_target_sha256": "955e21a840cf00e56b7d431e3d0cf5aa2a5cd66de3e61433a054f31249bdb9dc"
+    },
+    {
+      "source": "src/issue_triage/shared/screen/questions.py",
+      "target": "src/changelog_advisor/shared/screen/questions.py",
+      "source_git_blob": "6259493d681c5fdfd916f7b244b2d284318c6dad",
+      "source_sha256": "663ad1437f6abc709caa5b0115051f6eee41debfd41a74e213895651fd47aec8",
+      "bytes": 1488,
+      "kind": "exactruntimeunchanged",
+      "actual_target_sha256": "663ad1437f6abc709caa5b0115051f6eee41debfd41a74e213895651fd47aec8"
+    },
+    {
+      "source": "src/issue_triage/shared/screen/rules.py",
+      "target": "src/changelog_advisor/shared/screen/rules.py",
+      "source_git_blob": "e8b158e66dbb4d1cc128a82e0dcf61b44f8747dd",
+      "source_sha256": "c0b8920063f0eb3157d44cc76995a459e40267c78d9a5feab3c706ae85357a9b",
+      "bytes": 3537,
+      "kind": "exactruntimeunchanged",
+      "actual_target_sha256": "c0b8920063f0eb3157d44cc76995a459e40267c78d9a5feab3c706ae85357a9b"
+    },
+    {
+      "source": "src/issue_triage/shared/screen/s3_adapter.py",
+      "target": "src/changelog_advisor/shared/screen/s3_adapter.py",
+      "source_git_blob": "4c3f890ceeb3668a90f2480b41274d859569de1f",
+      "source_sha256": "fb5956b91fab5cf4fc992926b9f35b9c44f9bcfac61ec013126adc5d7495ae60",
+      "bytes": 7114,
+      "kind": "exactruntimeunchanged",
+      "actual_target_sha256": "fb5956b91fab5cf4fc992926b9f35b9c44f9bcfac61ec013126adc5d7495ae60"
+    },
+    {
+      "source": "src/issue_triage/shared/screen/typed.py",
+      "target": "src/changelog_advisor/shared/screen/typed.py",
+      "source_git_blob": "9e5abe31aabe89180c93abf3af41cc92a24b458e",
+      "source_sha256": "50a40aeb850693c4f10d3ea8a4a1e263819e9bd3a5c9a1681d9ec58be14f4bfb",
+      "bytes": 10526,
+      "kind": "exactruntimeunchanged",
+      "actual_target_sha256": "50a40aeb850693c4f10d3ea8a4a1e263819e9bd3a5c9a1681d9ec58be14f4bfb"
+    },
+    {
+      "source": "tests/screen/test_s3_native.py",
+      "target": "vendor/s6/tests/screen/test_s3_native.py",
+      "source_git_blob": "a83a6b5ac0aa65243006d98bd55f507a8b7e74d5",
+      "source_sha256": "cbb76dee8fe6840c50f0833be65bb1eecdd760a0fed66adc5d30470f3e242e0d",
+      "bytes": 15962,
+      "kind": "publicdocsandtestsonly",
+      "actual_target_sha256": "7e5e310eb37524a769a8833c0f8aac77dd05403f834e970f181e833e4d057c79",
+      "diff_sha256": "a5b99e740c8e17443e7b49d45bc19686cea51a8bbad94bccc0c723eb77c1913a",
+      "adaptation": "Test-onlynamespace/root/helperpath/detachedexactcomponents, no assertions or cases removed; original/adapted hashes."
+    },
+    {
+      "source": "tests/screen/test_screen.py",
+      "target": "vendor/s6/tests/screen/test_screen.py",
+      "source_git_blob": "a0207b74b87760f64b9d00d314e379d552fe1479",
+      "source_sha256": "3c2ba42b14a8909135a8a9bd5f0079a7fb50294c9b2fdf7176c55f1b709eee47",
+      "bytes": 18089,
+      "kind": "publicdocsandtestsonly",
+      "actual_target_sha256": "1096905f8a516352bb1c910761ea0f4ad1055e8bca49b72d235b75531e2d8ac4",
+      "diff_sha256": "9d77fb23f222fa533bad92e098d16dc398e6fce77a3ebfb2d3d0ab69fe5d4bc3",
+      "adaptation": "Test-onlynamespace/root/helperpath/detachedexactcomponents, no assertions or cases removed; original/adapted hashes."
+    },
+    {
+      "source": "LICENSE",
+      "target": "vendor/s6/LICENSE",
+      "source_sha256": "431665582156c442d0448d1f5cd2e45663ab96e6cf098711ffa58c4bb01b69e6",
+      "bytes": 1067,
+      "kind": "MITnotice",
+      "actual_target_sha256": "431665582156c442d0448d1f5cd2e45663ab96e6cf098711ffa58c4bb01b69e6"
+    }
+  ],
+  "canonical_S3_runtime": "Rootpublished2671816 purposefix retained;13otherc7corefiles unchanged. Actualsameclassobjects viarelativeimports; no copies/forwarders/newbudget.",
+  "test_helper": "PreviouslyadoptedS3originalpublicsyntheticRig c7namespaceadapted, not ownerapp helper. See actualmovedcontrols.",
+  "limits": "Offline/mock/strictreplay synthetic only; no genuineJev/SDK/auth/modelquality/durablecache/effectauthority. Atomiccurrentgeneration check still caller-owned."
+}
