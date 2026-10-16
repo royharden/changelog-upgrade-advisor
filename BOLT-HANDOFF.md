@@ -15,7 +15,7 @@ runs locally; live integrations and independent finished-app acceptance are pend
 | Input | Explicit bounded file/stdin bundle; saved snapshots only |
 | Hosted frontend | No React/Vite viewer implemented |
 | Database / migrations / auth / storage / functions / Realtime | Not required |
-| SDKs / API keys | Not needed for offline workflow; live path unqualified |
+| SDKs / API keys | Optional pinned SDK mock/accounting join; funded live path unqualified; offline workflow needs no keys |
 | Services / Docker / listeners | None required |
 | Hosting / publication | Unprovisioned and unverified |
 
@@ -44,6 +44,14 @@ the checkout: normal exit 0, refusal exit 3, zero provider calls. Overwrite and
 malformed-input checks refused with exit 2. The Linux CI wheel step is added;
 its hosted execution has not been verified.
 CI execution and live-model quality remain unverified.
+
+The optional SDK extra adopts exact canonical S3 provider/Ledger source and adds a
+programmatic simulation-only S5 judgment join. Windows SDK mock-wire controls use
+real ledger reservations and owned worker closure; they do not provision a service,
+read ambient keys or qualify a funded live call. Current unknown-usage completion
+failure is closed with its conservative hold retained; the canonical producer
+repair remains separate. The new SDK source was checked from the consumer source
+namespace, not as an installed SDK-enabled wheel or a hosted Linux/Bolt runtime.
 
 Importing this repo into Bolt does not execute or provision Python. A hosted
 analysis endpoint or interactive viewer needs separate design and backend

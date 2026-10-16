@@ -22,9 +22,17 @@ query.
 
 The keyword baseline is uncalibrated and can flag internal changes or miss changes
 without keywords. Typed/generative builders exist, but offline application runs
-return unavailable for those methods. No installed live SDK path, genuine model
-quality, selected thresholds or model evaluation is claimed. Rule screening does
-not establish injection robustness.
+return unavailable for those methods. An optional exact-source S3 SDK transport
+and programmatic S5 simulation join are installed and checked on mock wire with
+real local accounting. This is not a funded live call, project-account proof,
+genuine model quality, selected threshold or model evaluation. Rule screening
+does not establish injection robustness.
+
+If a native simulation fails after accounting begins, the consumer preserves its
+allocation reference and reports unknown attempt IDs/usage as null, not zero or
+"not run". The exact adopted producer currently raises a closed completion error
+for a successful mock answer with absent usage; its conservative unknown hold
+survives and S5 returns unavailable. The producer owner has the canonical repair.
 
 Advisory membership is separate from conditional usage. Outside-range and
 wrong-identity cases need no usage call. In-range cases needing interpretation

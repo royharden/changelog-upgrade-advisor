@@ -7,6 +7,7 @@ from ..shared.callledger.models import canonical_digest, decode_wire_json
 from ..shared.providers.adapters import PreparedRequest
 from ..shared.providers.controller import Provider
 from ..shared.providers.models import GenerateRequest, Result, TypedJudgmentRequest
+from ..shared.providers.sdk import SDKTransport
 from ..shared.screen.models import PreparedText, ScreenResult
 from ..shared.screen.prepare import prepare_text, wrap_untrusted
 from ..shared.screen.rules import screen_rules
@@ -249,6 +250,50 @@ def execute_offline(prepared, *, provider, purpose, ledger, budget, context, lim
         or limits.max_outbound_attempts != 0
     ):
         return outcome(data, policy, method, "unavailable", "offline_native_provider_required")
+    return _execute_bound(
+        prepared,
+        provider=provider,
+        purpose=purpose,
+        ledger=ledger,
+        budget=budget,
+        context=context,
+        limits=limits,
+        allocation=allocation,
+    )
+
+
+def execute_native_simulation(
+    prepared, *, provider, purpose, ledger, budget, context, limits, allocation
+):
+    """Join the canonical SDK mock wire to real accounting; never dispatch live."""
+    data, policy, method = prepared.data, prepared.policy, prepared.method
+    if prepared.request is None:
+        return decode_prepared(prepared, None)
+    if not _intact(prepared):
+        return outcome(data, policy, method, "error", "changed_request_or_source")
+    if (
+        not isinstance(provider, Provider)
+        or provider.mode != "injected_simulation"
+        or not isinstance(provider.transport, SDKTransport)
+        or provider.transport.is_test_transport is not True
+        or limits.max_attempts_total != 1
+        or limits.max_content_repairs != 0
+    ):
+        return outcome(data, policy, method, "unavailable", "native_simulation_required")
+    return _execute_bound(
+        prepared,
+        provider=provider,
+        purpose=purpose,
+        ledger=ledger,
+        budget=budget,
+        context=context,
+        limits=limits,
+        allocation=allocation,
+    )
+
+
+def _execute_bound(prepared, *, provider, purpose, ledger, budget, context, limits, allocation):
+    data, policy, method = prepared.data, prepared.policy, prepared.method
     if (
         context.source_generation != data.source_generation
         or context.span_id != data.span_id
@@ -256,8 +301,10 @@ def execute_offline(prepared, *, provider, purpose, ledger, budget, context, lim
         or context.policy_sha256 != policy.sha256
     ):
         return outcome(data, policy, method, "error", "consumer_context_mismatch")
+    run_started = False
     try:
         native = provider.prepare(prepared.request, context=context, limits=limits)
+        run_started = True
         result = provider.run(
             prepared.request,
             purpose=purpose,
@@ -268,5 +315,28 @@ def execute_offline(prepared, *, provider, purpose, ledger, budget, context, lim
             allocation=allocation,
         )
     except (TypeError, ValueError):
+        if (
+            run_started
+            and provider.mode == "injected_simulation"
+            and isinstance(provider.transport, SDKTransport)
+            and provider.transport.is_test_transport is True
+        ):
+            # A closed producer error may follow a durable attempt/unknown hold.
+            # No Result means no trustworthy attempt IDs/usage, rather than zero.
+            execution = ExecutionMetadata(
+                origin="mock",
+                model_requested=prepared.request.model,
+                accounting_ref=allocation.allocation_id,
+                attempt_ids=None,
+                current_external_cost_usd="0",
+            )
+            return outcome(
+                data,
+                policy,
+                method,
+                "unavailable",
+                "provider_failed_accounting_retained",
+                execution=execution,
+            )
         return outcome(data, policy, method, "unavailable", "provider_refused")
     return decode_prepared(prepared, result, dispatched_request=native)

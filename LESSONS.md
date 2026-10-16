@@ -45,3 +45,6 @@
 - Test the built and installed wheel away from the checkout. Load bundled demos
   through package resources, and ship the exact locked semver closure and license
   rather than assuming the source repository's npm installation is available.
+- A producer error can follow a durable dispatched attempt and unknown liability.
+  Retain the caller's allocation reference and unknown IDs/usage; never map that
+  case to "not run" or release its hold. Keep canonical fixes with the producer.

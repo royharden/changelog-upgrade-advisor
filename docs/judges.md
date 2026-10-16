@@ -24,7 +24,23 @@ caller's existing ledger, budget, context, limits and allocation. It performs no
 admission or auxiliary calls. Native context must bind the input, policy, source
 generation and span. Request, policy and source mutations fail closed. Native
 prepared-request and source-capture identities must match before decoding. The
-current layer has no installed live SDK path and refuses live-origin input.
+layer refuses live-origin input; funded live app judgments remain unqualified.
+
+The optional `execute_native_simulation` entry uses the same caller-owned six
+accounting arguments and exact canonical S3 SDK mock transport. It permits only
+injected simulation with one attempt and no content repair. It does not admit an
+operation, read credentials or enable a live CLI path. A caller skipping an
+already-funded conditional child must close it with the canonical undispatched
+proof; a validation refusal before dispatch leaves cancellation with that caller.
+
+Mock wire requests run the actual pinned SDKs inside a bounded owned worker.
+Generation/typed answers still pass this layer's source/request/schema checks.
+If a closed producer error occurs after `run` begins, the consumer returns an
+unavailable judgment, retains the allocation reference, labels mock origin, and
+keeps unknown attempt IDs/usage null. An empty reported attempt sequence remains
+distinct from unknown IDs. No capture, model latency or settled charge is invented;
+the actual ledger retains conservative liability. This is simulation accounting,
+not a real provider observation or independent product acceptance.
 
 Returned span IDs, enums, extra actions, booleans, probabilities and optional free
 quotes are validated. Displayed quotes are always copied from the original entry;

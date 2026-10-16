@@ -1,13 +1,11 @@
-"""One offline controller: actual Ledger calls, immutable fixtures or injected test transport.
-
-There is intentionally no HTTP/SDK client, credential lookup or live mode here.
-"""
+"""One accounting controller for offline reuse, simulations and explicit native SDK calls."""
 
 import hashlib
 import math
 import time
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field
+from copy import deepcopy
+from dataclasses import dataclass, field, replace
 from decimal import Decimal, localcontext
 from email.utils import parsedate_to_datetime
 from types import MappingProxyType
@@ -46,6 +44,7 @@ from .models import (
     SafeError,
     SourceCaptureRef,
 )
+from .repair import GenerationRepairPolicy, build_generation_repair_request
 from .schema import validate_output
 
 
@@ -102,7 +101,7 @@ class Provider:
         self,
         config: ProviderConfig,
         *,
-        mode: Literal["mock", "strict_replay", "injected_simulation"],
+        mode: Literal["mock", "strict_replay", "injected_simulation", "live"],
         request_evidence: Iterable[RequestEvidence],
         fixtures: FixtureIndex | None = None,
         transport: InjectedTransport | None = None,
@@ -111,8 +110,19 @@ class Provider:
         clock=None,
         sleep=None,
     ):
-        if mode not in {"mock", "strict_replay", "injected_simulation"}:
+        if mode not in {"mock", "strict_replay", "injected_simulation", "live"}:
             raise ProviderError("unsupported_live_transport")
+        if mode == "live":
+            from .sdk import SDKTransport
+
+            if (
+                not isinstance(transport, SDKTransport)
+                or transport.is_test_transport
+                or transport.flavor != config.flavor
+                or capture_mode != "disabled"
+                or fixtures is not None
+            ):
+                raise ProviderError("unsupported_live_transport")
         if capture_mode not in {"disabled", "fixture_replay"}:
             raise ProviderError("unsupported_capture_mode")
         self.config = ProviderConfig.model_validate(config.model_dump(mode="json"))
@@ -134,9 +144,34 @@ class Provider:
         self.sleep = sleep or time.sleep
 
     def prepare(self, request, *, context: CallContext, limits: Limits) -> PreparedRequest:
-        return prepare_request(
+        prepared = prepare_request(
             request, config=self.config, context=context, limits=limits, images=self.images
         )
+        if self.transport is not None:
+            from .sdk import SDKTransport
+
+            if isinstance(self.transport, SDKTransport):
+                if self.transport.flavor != self.config.flavor:
+                    raise ProviderError("provider_binding")
+                payload = self.transport.prepare_payload(prepared.payload_json)
+                prepared = replace(
+                    prepared,
+                    payload_json=payload,
+                    dispatched_envelope_sha256=hashlib.sha256(payload).hexdigest(),
+                )
+        return prepared
+
+    @property
+    def ledger_mode(self):
+        if self.mode == "live":
+            return "external"
+        return "simulation" if self.mode == "injected_simulation" else "offline"
+
+    def _live_limits(self, limits):
+        if self.mode == "live" and (
+            limits.max_attempts_total != 1 or limits.max_content_repairs != 0
+        ):
+            raise ProviderError("unsupported_live_retries")
 
     def admit_operation(
         self,
@@ -148,11 +183,12 @@ class Provider:
         limits: Limits,
     ) -> Allocation:
         self._budget(ledger, budget)
+        self._live_limits(limits)
         return ledger.admit_operation(
             plan,
             context=context,
             limits=limits,
-            mode="simulation" if self.mode == "injected_simulation" else "offline",
+            mode=self.ledger_mode,
         )
 
     @staticmethod
@@ -164,6 +200,7 @@ class Provider:
 
     def _bound(self, request, *, purpose, ledger, budget, context, limits, allocation):
         self._budget(ledger, budget)
+        self._live_limits(limits)
         prepared = self.prepare(request, context=context, limits=limits)
         envelope = ExecutionEnvelope(
             schema_version=1,
@@ -189,7 +226,7 @@ class Provider:
             context=context,
             limits=limits,
             request=evidence,
-            require_zero_dispatch=self.mode != "injected_simulation",
+            require_zero_dispatch=self.ledger_mode == "offline",
         )
         if (view.provider_config_sha256, view.model, view.bound_evidence_sha256) != (
             self.config.sha256,
@@ -197,7 +234,7 @@ class Provider:
             evidence.bound_evidence_sha256,
         ):
             raise ProviderError("provider_binding")
-        if view.mode != ("simulation" if self.mode == "injected_simulation" else "offline"):
+        if view.mode != self.ledger_mode:
             raise ProviderError("mode_mismatch")
         return prepared, evidence, view
 
@@ -239,8 +276,32 @@ class Provider:
         context: CallContext,
         limits: Limits,
         allocation: Allocation,
+        generation_repair: GenerationRepairPolicy | None = None,
+        content_validator=None,
     ) -> Result:
         started = self.clock()
+        repair_request = None
+        if generation_repair is not None:
+            try:
+                generation_repair = GenerationRepairPolicy.model_validate(
+                    generation_repair.model_dump(mode="json")
+                )
+                repair_request = build_generation_repair_request(request, generation_repair)
+                revision = None if content_validator is None else content_validator.revision_sha256
+                if (
+                    self.mode != "injected_simulation"
+                    or self.capture_mode != "disabled"
+                    or context.config_sha256 != generation_repair.bound_config_sha256
+                    or revision != generation_repair.content_validator_revision_sha256
+                    or (content_validator is not None and not callable(content_validator.validate))
+                    or limits.max_attempts_total != 2
+                    or limits.max_content_repairs != 1
+                ):
+                    raise ValueError("generation_repair_binding")
+            except (ValueError, AttributeError, TypeError):
+                raise ProviderError("generation_repair_binding") from None
+        elif content_validator is not None:
+            raise ProviderError("generation_repair_binding")
         prepared, evidence, view = self._bound(
             request,
             purpose=purpose,
@@ -250,7 +311,29 @@ class Provider:
             limits=limits,
             allocation=allocation,
         )
-        if self.mode != "injected_simulation":
+        repair_prepared = repair_evidence = None
+        if repair_request is not None:
+            # Both exact requests must already be trusted and fit the funded child.
+            repair_prepared, repair_evidence, _ = self._bound(
+                repair_request,
+                purpose=purpose,
+                ledger=ledger,
+                budget=budget,
+                context=context,
+                limits=limits,
+                allocation=allocation,
+            )
+            if (
+                view.operation_state != "pending"
+                or view.child_state != "pending"
+                or view.used_attempts != 0
+                or view.remaining_attempts != 2
+                or view.max_attempts != 2
+                or view.max_repairs != 1
+                or view.repairs_used != 0
+            ):
+                raise ProviderError("generation_repair_fresh_child")
+        if self.mode not in {"injected_simulation", "live"}:
             return self._reuse(
                 prepared,
                 evidence,
@@ -261,9 +344,8 @@ class Provider:
                 limits=limits,
                 allocation=allocation,
             )
-        if (
-            self.transport is None
-            or getattr(self.transport, "is_test_transport", False) is not True
+        if self.transport is None or getattr(self.transport, "is_test_transport", None) is not (
+            self.mode == "injected_simulation"
         ):
             raise ProviderError("unsupported_live_transport")
         if isinstance(prepared.request, GenerateRequest) and any(
@@ -282,6 +364,9 @@ class Provider:
             context=context,
             limits=limits,
             allocation=allocation,
+            repair_prepared=repair_prepared,
+            repair_evidence=repair_evidence,
+            content_validator=content_validator,
         )
 
     def complete(
@@ -300,6 +385,8 @@ class Provider:
         stream: bool = False,
         reasoning_effort: str | None = None,
         temperature: float | None = None,
+        generation_repair: GenerationRepairPolicy | None = None,
+        content_validator=None,
     ) -> Result:
         request = GenerateRequest.model_validate(
             dict(
@@ -322,6 +409,8 @@ class Provider:
             context=context,
             limits=limits,
             allocation=allocation,
+            generation_repair=generation_repair,
+            content_validator=content_validator,
         )
 
     def _reuse(self, prepared, evidence, view, *, started, ledger, context, limits, allocation):
@@ -481,7 +570,23 @@ class Provider:
 
         return datetime.now(UTC)
 
-    def _injected(self, prepared, evidence, *, started, ledger, context, limits, allocation):
+    def _injected(
+        self,
+        prepared,
+        evidence,
+        *,
+        started,
+        ledger,
+        context,
+        limits,
+        allocation,
+        repair_prepared=None,
+        repair_evidence=None,
+        content_validator=None,
+    ):
+        logical_request = prepared.request
+        repair_enabled = repair_prepared is not None
+        content_repair = False
         attempts = []
         usages = []
         costs = []
@@ -503,7 +608,11 @@ class Provider:
                 raise ProviderError("attempt_limit")
             timeout = min(limits.attempt_timeout_s, view.deadline_remaining_s)
             attempt = ledger.begin_attempt(
-                allocation, context=context, request=evidence, caller_limits=limits
+                allocation,
+                context=context,
+                request=evidence,
+                caller_limits=limits,
+                content_repair=content_repair,
             )
             attempts.append(attempt)
             try:
@@ -523,6 +632,10 @@ class Provider:
             call_started = self.clock()
             reply = None
             retryable = False
+            repairable = False
+            if repair_enabled:
+                # A later missing body cannot be attributed to the prior physical request.
+                last_body = None
             last_error_code = None
             try:
                 reply = self.transport.send(
@@ -559,6 +672,20 @@ class Provider:
                             config=self.config,
                             max_bytes=limits.max_response_bytes,
                         )
+                        if repair_enabled and outcome.status == "invalid_output":
+                            # Decode the same envelope without schema checking only to
+                            # distinguish actual generated text from malformed envelopes.
+                            text_view = replace(
+                                prepared,
+                                request=prepared.request.model_copy(update={"output_schema": None}),
+                            )
+                            unvalidated = decode_outcome(
+                                reply.body,
+                                prepared=text_view,
+                                config=self.config,
+                                max_bytes=limits.max_response_bytes,
+                            )
+                            repairable = unvalidated.status == "ok"
                     except (ValueError, UnicodeError):
                         outcome = Outcome(
                             "invalid_output", None, normalize_usage(raw, self.config.flavor), raw
@@ -589,6 +716,7 @@ class Provider:
                 and outcome.model_reported
                 not in self.config.models[prepared.request.model].reported_models
             ):
+                repairable = False
                 outcome = Outcome(
                     "invalid_output",
                     outcome.model_reported,
@@ -616,6 +744,20 @@ class Provider:
                 )
                 first_kind = "unavailable"
                 first_ms = None
+                repairable = False
+            if repair_enabled and outcome.status == "ok" and content_validator is not None:
+                try:
+                    accepted = content_validator.validate(deepcopy(outcome.parsed))
+                    if type(accepted) is not bool:
+                        raise ValueError("invalid_validator_result")
+                    if not accepted:
+                        repairable = True
+                        outcome = replace(outcome, status="invalid_output", text=None, parsed=None)
+                except Exception:
+                    repairable = False
+                    last_error_code = "invalid_output"
+                    outcome = replace(outcome, status="invalid_output", text=None, parsed=None)
+                elapsed = max((self.clock() - call_started) * 1000, 0)
             if elapsed > timeout * 1000:
                 outcome = Outcome(
                     "deadline_exceeded",
@@ -624,6 +766,7 @@ class Provider:
                     outcome.usage_raw,
                 )
                 retryable = False
+                repairable = False
             metadata = self._metadata(
                 outcome,
                 context=context,
@@ -646,6 +789,24 @@ class Provider:
                     outcome.usage_raw,
                 )
                 retryable = False
+                repairable = False
+            if repairable and not content_repair:
+                try:
+                    current = ledger.validate_allocation(
+                        allocation, context=context, limits=limits, request=repair_evidence
+                    )
+                    can_repair = (
+                        current.used_attempts < current.max_attempts
+                        and current.remaining_attempts > 0
+                        and current.repairs_used < current.max_repairs
+                        and ledger.retry_fits(allocation, retry_after_s=0)
+                    )
+                except ValueError:
+                    can_repair = False
+                if can_repair:
+                    prepared, evidence = repair_prepared, repair_evidence
+                    content_repair = True
+                    continue
             if retryable:
                 try:
                     delay = self._retry_delay(reply.headers, used=view.used_attempts + 1)
@@ -688,7 +849,7 @@ class Provider:
         source = SourceCaptureRef(
             capture_id=attempts[-1],
             capture_sha256=hashlib.sha256(last_body).hexdigest(),
-            origin="synthetic",
+            origin="live" if self.mode == "live" else "synthetic",
             source_run_id=context.run_id,
             request_identity_sha256=prepared.request_identity_sha256,
             model_requested=prepared.request.model,
@@ -731,10 +892,10 @@ class Provider:
             normalized_usage=usage,
             accounting_ref=allocation.allocation_id,
             attempt_ids=attempts,
-            origin="mock",
+            origin="live" if self.mode == "live" else "mock",
             source_capture=source,
             latency_ms=max((self.clock() - started) * 1000, 0),
             first_output_ms=first_ms,
             first_output_kind=first_kind,
-            current_external_cost_usd="0",
-        ).validate_for(prepared.request)
+            current_external_cost_usd=source_cost if self.mode == "live" else "0",
+        ).validate_for(logical_request)

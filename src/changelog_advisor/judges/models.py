@@ -99,7 +99,7 @@ class ExecutionMetadata(WireModel):
     model_requested: str | None = None
     model_reported: str | None = None
     accounting_ref: str | None = None
-    attempt_ids: tuple[str, ...] = ()
+    attempt_ids: tuple[str, ...] | None = ()
     normalized_usage: NormalizedUsage | None = None
     current_external_cost_usd: str | None = None
     source_capture: SourceCaptureRef | None = None

@@ -114,7 +114,16 @@ keyword false positive and misses a change without keywords.
 
 ## Remaining work
 
-Live provider/SDK qualification, genuine bounded model tests, conditional usage
+The optional SDK consumer uses exact accepted S3 provider/Ledger source, pinned
+SDK dependencies and `execute_native_simulation` for programmatic mock-wire joins.
+Install the extra with `uv sync --frozen --extra sdk`. This entry requires the
+same caller-owned purpose, ledger, budget, context, limits and allocation objects;
+it accepts only the canonical SDK mock transport with one attempt and no repair.
+The CLI retains its offline behavior. Unknown failed-attempt IDs/usage remain null;
+the actual ledger retains conservative unknown liability. Mock results are not live
+answers. Source/license details are in the modules' `VENDORED.md` files.
+
+Funded live provider qualification, genuine bounded model tests, conditional usage
 judging, controlled evaluation and method selection remain outstanding. Actual
 bounded HTTP acquisition, remaining portable source-domain resolver exports and
 licensed real examples also remain incomplete. A static report and passing local
