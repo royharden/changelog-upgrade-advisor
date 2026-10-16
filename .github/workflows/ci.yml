@@ -19,4 +19,16 @@ jobs:
       - run: uv run --frozen --offline ruff format --check .
       - run: uv run --frozen --offline pytest tests vendor --junitxml=junit-bootstrap.xml
       - run: uv run --frozen --offline python scripts/demo.py --mode offline --out out/ci-demo
+      - name: Installed wheel normal and refusal journeys
+        run: |
+          uv build --wheel
+          uv venv "$RUNNER_TEMP/advisor-wheel" --python 3.12
+          uv pip install --python "$RUNNER_TEMP/advisor-wheel/bin/python" dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/advisor-wheel/bin/advisor" demo --out advisor-wheel-normal
+          set +e
+          "$RUNNER_TEMP/advisor-wheel/bin/advisor" demo --refusal --out advisor-wheel-refusal
+          refusal_status=$?
+          set -e
+          test "$refusal_status" -eq 3
       - run: uv run --frozen --offline python scripts/check_secrets.py --tracked

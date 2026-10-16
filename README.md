@@ -27,15 +27,22 @@ These are reproducible workflow examples, not a quality benchmark.
 For your own saved inputs:
 
 ```sh
-uv run advisor analyze --bundle fixtures/demo-seeded/normal.json --out out/custom
-cat fixtures/demo-seeded/normal.json | uv run advisor analyze --bundle - --out out/stdin
+uv run advisor analyze --bundle src/changelog_advisor/demo_data/normal.json --out out/custom
+cat src/changelog_advisor/demo_data/normal.json | uv run advisor analyze --bundle - --out out/stdin
 ```
 
 The bundle edition is `s5-supplied-bundle/1`. It retains original manifest, lock
 and registry JSON as strings, plus literal notes and optional usage snippets.
 Inspect the example for its schema. Input files/stdin are capped at 64 MiB;
-component limits also apply. No supplied URL, source command or package hook is
+component limits also apply. The two synthetic demo bundles ship as package
+resources in source and wheel builds. No supplied URL, source command or package hook is
 followed. Invalid input/runtime or an existing output directory returns exit 2.
+
+To build a wheel, run `npm ci --ignore-scripts` before `uv build --wheel`.
+The wheel includes semver 7.8.5 and its ISC license from that locked installation.
+Install it in a Python 3.12 environment with `pip install path/to/package.whl`;
+native Node 22+ must still be on PATH. The installed `advisor demo` uses bundled
+resources and does not need the source checkout or a separate npm installation.
 
 ## What the checklist shows
 

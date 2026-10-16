@@ -42,3 +42,6 @@
 - Keep a pointer's declared quote digest separate from the resolver's reported
   digest. Test unavailable resolution with a digest distinct from the source and
   artifact hashes so incidental matching text cannot hide missing evidence.
+- Test the built and installed wheel away from the checkout. Load bundled demos
+  through package resources, and ship the exact locked semver closure and license
+  rather than assuming the source repository's npm installation is available.

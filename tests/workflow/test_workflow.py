@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def bundle(name="normal"):
-    return read_bundle((ROOT / f"fixtures/demo-seeded/{name}.json").read_bytes())
+    return read_bundle((ROOT / f"src/changelog_advisor/demo_data/{name}.json").read_bytes())
 
 
 @pytest.fixture(scope="module")
@@ -301,7 +301,7 @@ def test_stdin_bundle_is_bounded_and_runs_same_pipeline(npm, monkeypatch, tmp_pa
 
     actual = cli.analyze_bundle
     monkeypatch.setattr(cli, "analyze_bundle", lambda b, **kw: actual(b, runtime=npm, **kw))
-    raw = (ROOT / "fixtures/demo-seeded/normal.json").read_bytes()
+    raw = (ROOT / "src/changelog_advisor/demo_data/normal.json").read_bytes()
     monkeypatch.setattr("sys.stdin", SimpleNamespace(buffer=io.BytesIO(raw)))
     assert main(["analyze", "--bundle", "-", "--out", str(tmp_path / "stdin")]) == 0
     assert json.loads(capsys.readouterr().out)["counts"]["packages"] == 5

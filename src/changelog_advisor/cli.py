@@ -3,6 +3,7 @@
 import argparse
 import json
 import sys
+from importlib.resources import files
 from pathlib import Path
 
 from .pipeline import analyze_bundle, read_bundle
@@ -32,9 +33,9 @@ def run(argv):
             args.bundle
             if args.command == "analyze"
             else (
-                Path(__file__).resolve().parents[2]
-                / "fixtures/demo-seeded"
-                / ("refusal.json" if args.refusal else "normal.json")
+                files("changelog_advisor").joinpath(
+                    "demo_data", "refusal.json" if args.refusal else "normal.json"
+                )
             )
         )
         if args.command == "analyze" and path == Path("-"):

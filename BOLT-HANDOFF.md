@@ -35,7 +35,15 @@ The normal CLI generates all three reports; the refusal CLI returns exit 3 and
 retains unknown advisories and incomplete coverage. Output directories must be
 new. Local controls cover malformed input, literal quote downgrade, escaping,
 overwrite refusal and an actual detached normal/refusal source closure.
-CI execution, wheel installation and live-model quality remain unverified.
+The wheel build requires `npm ci --ignore-scripts` followed by `uv build --wheel`;
+it bundles the two synthetic demo resources and locked semver 7.8.5 with its ISC
+license. An installed wheel still needs Python 3.12, Pydantic and native Node 22+.
+Local Windows checks built and installed the wheel into a fresh Python environment,
+then ran both the installed module and generated `advisor` executable away from
+the checkout: normal exit 0, refusal exit 3, zero provider calls. Overwrite and
+malformed-input checks refused with exit 2. The Linux CI wheel step is added;
+its hosted execution has not been verified.
+CI execution and live-model quality remain unverified.
 
 Importing this repo into Bolt does not execute or provision Python. A hosted
 analysis endpoint or interactive viewer needs separate design and backend

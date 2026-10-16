@@ -4,7 +4,10 @@ The offline CLI joins supplied manifest/notes/advisory inputs to static reports.
 Independent finished-app review and full product acceptance remain pending.
 Synthetic workflow controls do not establish semantic or live-model quality.
 
-Version arithmetic requires pinned npm semver and native Node. The five-second
+Version arithmetic requires pinned npm semver and native Node.
+Wheel builds bundle the locked semver package and synthetic demo resources;
+they require the documented npm installation step before building. Native Node
+is an external prerequisite even after wheel installation. The five-second
 operation deadline includes startup, locking and IPC. Missing Node, timeouts and
 malformed output remain unknown/incomplete. The persistent helper has lifecycle
 controls. Earlier Node failures and a test-collection collision remain historical

@@ -20,6 +20,9 @@ dev = ["pytest>=8,<10", "ruff>=0.12,<1", "pre-commit>=4,<5"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/changelog_advisor"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"node_modules/semver" = "changelog_advisor/node_modules/semver"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]

@@ -15,7 +15,6 @@ def test_complete_local_source_closure_runs_normal_and_refusal_away_from_owner(t
         app / "src/changelog_advisor",
         ignore=shutil.ignore_patterns("__pycache__"),
     )
-    shutil.copytree(root / "fixtures/demo-seeded", app / "fixtures/demo-seeded")
     shutil.copytree(root / "node_modules/semver", app / "node_modules/semver")
     assert (app / "node_modules/semver/LICENSE").is_file()
     script = r"""
