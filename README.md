@@ -119,9 +119,13 @@ SDK dependencies and `execute_native_simulation` for programmatic mock-wire join
 Install the extra with `uv sync --frozen --extra sdk`. This entry requires the
 same caller-owned purpose, ledger, budget, context, limits and allocation objects;
 it accepts only the canonical SDK mock transport with one attempt and no repair.
-The CLI retains its offline behavior. Unknown failed-attempt IDs/usage remain null;
-the actual ledger retains conservative unknown liability. Mock results are not live
-answers. Source/license details are in the modules' `VENDORED.md` files.
+The CLI retains its offline behavior. Unknown-priced mock answers return unavailable
+with actual attempt/model/source/allocation refs and normalized null usage fields;
+the ledger retains conservative liability and a genuine settlement/completion proof.
+Missing an unpriced counter can still permit known input-only cost. Exceptional
+producer failures retain allocation refs with unknown attempt IDs/usage as null.
+Mock results are not live answers. Source/license details are in the modules'
+`VENDORED.md` files; successor combined acceptance remains review-pending.
 
 Funded live provider qualification, genuine bounded model tests, conditional usage
 judging, controlled evaluation and method selection remain outstanding. Actual

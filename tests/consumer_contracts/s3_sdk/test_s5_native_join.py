@@ -27,7 +27,7 @@ helpers = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(helpers)
 
 
-def consumer(factory, tmp_path, method="generative", *, usage=True, delay=0, malformed=False):
+def consumer(factory, tmp_path, method="generative", *, usage="known", delay=0, malformed=False):
     typed = method == "typed"
     model = "jev-1.13.0" if typed else "gpt-6-luna"
     text = "Removed public lookup()."
@@ -47,7 +47,7 @@ def consumer(factory, tmp_path, method="generative", *, usage=True, delay=0, mal
             "max_attempts_total": 1,
             "max_content_repairs": 0,
             "max_outbound_attempts": 2,
-            "attempt_timeout_s": 10.0 if delay else 20.0,
+            "attempt_timeout_s": 20.0,
         }
     )
     rig.policy = rig.policy.model_copy(update={"output_usd_per_million": "0"})
@@ -97,10 +97,15 @@ def consumer(factory, tmp_path, method="generative", *, usage=True, delay=0, mal
                 "free_quote": "lookup()",
             }
         )
-    if usage:
-        body["usage"] = {"input_tokens": 100, "output_tokens": 1}
-    else:
+    if usage == "absent":
         body.pop("usage", None)
+    else:
+        body["usage"] = {
+            "known": {"input_tokens": 100, "output_tokens": 1},
+            "null": None,
+            "malformed": {"input_tokens": "unmeasured", "output_tokens": None},
+            "unpriced_counter_absent": {"input_tokens": 100},
+        }[usage]
     raw = b"{invalid-json" if malformed else json.dumps(body).encode()
     transport = SDKTransport(
         rig.config.flavor,
@@ -131,6 +136,47 @@ def admit(rig, provider, ledger, *, conditional=False):
     return provider.admit_operation(
         plan, ledger=ledger, budget=rig.authority, context=rig.context(), limits=rig.limits
     )
+
+
+def settlement_proof(result, rig, ledger, allocation, *, known):
+    """what_bug_this_catches: bare mark_unknown is passed off as genuine settlement."""
+    rows = ledger.connection.execute("SELECT * FROM attempts").fetchall()
+    assert len(rows) == 1
+    attempt = rows[0]
+    child = ledger.connection.execute("SELECT * FROM children").fetchone()
+    record = json.loads(attempt["settlement"])
+    digest = canonical_digest(record)
+    assert digest == attempt["settlement_sha"] == child["completion_proof"]
+    assert digest != canonical_digest({"attempt_id": attempt["id"], "status": "unknown_dispatch"})
+    assert attempt["state"] == record["cost"]["status"] == ("known" if known else "unknown")
+    assert child["state"] == ("complete" if known else "failed")
+    assert record["metadata"]["status"] == ("ok" if known else "unknown")
+    assert result.execution.attempt_ids == (attempt["id"],)
+    assert result.execution.accounting_ref == allocation.allocation_id
+    assert result.execution.normalized_usage.model_dump(mode="json") == record["usage"]
+    assert result.execution.model_requested == result.execution.model_reported == rig.request.model
+    source = result.execution.source_capture
+    assert source.capture_id == attempt["id"]
+    assert source.request_identity_sha256 == attempt["request_sha"]
+    assert source.usage_ref == canonical_digest(record["usage"])
+    assert source.price_ref == record["price_snapshot_sha256"]
+    assert source.source_run_id == rig.context().run_id
+    assert source.model_requested == source.model_reported == rig.request.model
+    assert source.cost_usd == record["cost"]["computed_cost_usd"]
+    assert result.execution.origin == "mock" and source.origin == "synthetic"
+    assert result.execution.current_external_cost_usd == "0"
+    totals = ledger.totals()
+    assert totals["dispatched_attempts"] == 1
+    assert Decimal(totals["active_holds_usd"]) == Decimal(totals["future_holds_usd"]) == 0
+    assert ledger.operation_state(allocation) == ("complete" if known else "partial")
+    return {
+        "attempt_id": attempt["id"],
+        "settlement_sha256": digest,
+        "completion_proof": child["completion_proof"],
+        "record": record,
+        "execution": result.execution.model_dump(mode="json"),
+        "totals": totals,
+    }
 
 
 @pytest.mark.parametrize("method", ["generative", "typed"])
@@ -204,22 +250,67 @@ def test_wrong_s5_context_refuses_without_dispatch_and_caller_cancels_hold(facto
         assert Decimal(ledger.totals()["future_holds_usd"]) == 0
 
 
-@pytest.mark.parametrize("mode", ["missing_usage", "malformed"])
-def test_consumer_keeps_unknown_liability_without_repair(factory, tmp_path, mode):
+@pytest.mark.parametrize("method", ["generative", "typed"])
+@pytest.mark.parametrize("usage", ["absent", "null", "malformed"])
+def test_valid_answer_unknown_usage_retains_genuine_settlement_and_provenance(
+    factory, tmp_path, method, usage, record_property
+):
+    """what_bug_this_catches: usable answer leaks or real attempt/source refs disappear."""
+    prepared, rig, provider, transport = consumer(factory, tmp_path, method, usage=usage)
+    with rig.open() as ledger:
+        allocation = admit(rig, provider, ledger)
+        result = execute_native_simulation(
+            prepared, provider=provider, **rig.kwargs(ledger, allocation)
+        )
+        record_property("worker", json.dumps(transport.last_execution, sort_keys=True))
+        assert transport.last_execution["owned_tree_closed"]
+        assert transport.last_execution["active_owned_processes_after"] == 0
+        assert transport.last_execution["physical_dispatch_observed"]
+        assert result.status == "unavailable" and result.reason == "provider_not_ok"
+        assert result.judgment is None and result.literal_quote is None
+        proof = settlement_proof(result, rig, ledger, allocation, known=False)
+        record_property("settlement_proof", json.dumps(proof, sort_keys=True))
+        assert all(value is None for value in proof["record"]["usage"].values())
+        assert proof["record"]["cost"]["computed_cost_usd"] is None
+        assert Decimal(ledger.totals()["known_spend_usd"]) == 0
+        assert Decimal(ledger.totals()["unknown_liability_usd"]) == Decimal("0.1")
+
+
+@pytest.mark.parametrize("method", ["generative", "typed"])
+def test_missing_unpriced_counter_still_settles_known_flat_input_cost(
+    factory, tmp_path, method, record_property
+):
+    """what_bug_this_catches: blanket missing-counter rule rejects known input-only billing."""
     prepared, rig, provider, transport = consumer(
-        factory, tmp_path, usage=mode != "missing_usage", malformed=mode == "malformed"
+        factory, tmp_path, method, usage="unpriced_counter_absent"
     )
     with rig.open() as ledger:
         allocation = admit(rig, provider, ledger)
         result = execute_native_simulation(
             prepared, provider=provider, **rig.kwargs(ledger, allocation)
         )
-        if mode == "malformed":
-            assert result.status != "ok" and result.judgment is None
-        else:
-            assert result.execution.normalized_usage is None
-            assert result.execution.attempt_ids is None
-            assert result.execution.accounting_ref == allocation.allocation_id
+        record_property("worker", json.dumps(transport.last_execution, sort_keys=True))
+        assert transport.last_execution["owned_tree_closed"]
+        assert transport.last_execution["active_owned_processes_after"] == 0
+        assert transport.last_execution["physical_dispatch_observed"]
+        assert result.status == "ok" and result.judgment.category == "removed"
+        proof = settlement_proof(result, rig, ledger, allocation, known=True)
+        record_property("settlement_proof", json.dumps(proof, sort_keys=True))
+        assert proof["record"]["usage"]["input_tokens"] == 100
+        assert proof["record"]["usage"]["output_tokens"] is None
+        assert Decimal(proof["record"]["cost"]["computed_cost_usd"]) == Decimal("0.01")
+        assert Decimal(ledger.totals()["known_spend_usd"]) == Decimal("0.01")
+        assert Decimal(ledger.totals()["unknown_liability_usd"]) == 0
+
+
+def test_malformed_body_keeps_unknown_liability_without_repair(factory, tmp_path):
+    prepared, rig, provider, transport = consumer(factory, tmp_path, malformed=True)
+    with rig.open() as ledger:
+        allocation = admit(rig, provider, ledger)
+        result = execute_native_simulation(
+            prepared, provider=provider, **rig.kwargs(ledger, allocation)
+        )
+        assert result.status != "ok" and result.judgment is None
         assert result.execution.origin == "mock"
         assert ledger.totals()["dispatched_attempts"] == 1
         assert Decimal(ledger.totals()["unknown_liability_usd"]) > 0
@@ -227,21 +318,24 @@ def test_consumer_keeps_unknown_liability_without_repair(factory, tmp_path, mode
         assert transport.last_execution["active_owned_processes_after"] == 0
 
 
-def test_s5_hard_deadline_closes_native_worker_and_keeps_reservation(factory, tmp_path):
-    prepared, rig, provider, transport = consumer(factory, tmp_path, delay=30)
+def test_s5_hard_deadline_closes_native_worker_and_keeps_reservation(
+    factory, tmp_path, record_property
+):
+    prepared, rig, provider, transport = consumer(factory, tmp_path, delay=60)
     with rig.open() as ledger:
         allocation = admit(rig, provider, ledger)
         result = execute_native_simulation(
             prepared, provider=provider, **rig.kwargs(ledger, allocation)
         )
+        record_property("worker", json.dumps(transport.last_execution, sort_keys=True))
+        assert transport.last_execution["owned_tree_closed"]
+        assert transport.last_execution["active_owned_processes_after"] == 0
         assert result.status == "unavailable" and result.judgment is None
         assert result.execution.origin == "mock"
         assert (
             transport.last_execution["timed_out"]
             and transport.last_execution["physical_dispatch_observed"]
         )
-        assert transport.last_execution["owned_tree_closed"]
-        assert transport.last_execution["active_owned_processes_after"] == 0
         assert ledger.totals()["dispatched_attempts"] == 1
         assert Decimal(ledger.totals()["unknown_liability_usd"]) > 0
 

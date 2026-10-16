@@ -29,11 +29,19 @@ This is not a funded live call, project-account proof,
 genuine model quality, selected threshold or model evaluation. Rule screening
 does not establish injection robustness.
 
-If a native simulation fails after accounting begins, the consumer preserves its
-allocation reference and reports unknown attempt IDs/usage as null, not zero or
-"not run". The exact adopted producer currently raises a closed completion error
-for a successful mock answer with absent usage; its conservative unknown hold
-survives and S5 returns unavailable. The producer owner has the canonical repair.
+The adopted S3 successor prices usage before settlement. A valid mock answer with
+absent, null or malformed usage returns unavailable when its billed cost is
+unknown. S5 retains the actual attempt IDs, requested/reported model, source
+capture, normalized null usage fields and allocation reference. The real local
+Ledger retains unknown liability with a genuine settlement hash and failed-child
+completion proof; no repair or second dispatch occurs. Missing an unpriced output
+counter can still settle known input-only cost. The source consumer checks both
+SDKs; this successor has no installed-wheel or live qualification yet, and combined
+acceptance remains pending independent review. Earlier producer completion errors
+and the old wheel's first deadline-control failure remain in retained receipts.
+For an exceptional producer failure after accounting begins, the defensive consumer
+fallback still preserves its allocation and reports unavailable with unknown
+attempt IDs/usage as null, never zero or "not run".
 
 Advisory membership is separate from conditional usage. Outside-range and
 wrong-identity cases need no usage call. In-range cases needing interpretation

@@ -48,10 +48,15 @@ CI execution and live-model quality remain unverified.
 The optional SDK extra adopts exact canonical S3 provider/Ledger source and adds a
 programmatic simulation-only S5 judgment join. Windows SDK mock-wire controls use
 real ledger reservations and owned worker closure; they do not provision a service,
-read ambient keys or qualify a funded live call. Current unknown-usage completion
-failure is closed with its conservative hold retained; the canonical producer
-repair remains separate. The new SDK source was checked from the consumer source
-namespace, not as an installed SDK-enabled wheel or a hosted Linux/Bolt runtime.
+read ambient keys or qualify a funded live call. The exact canonical S3 successor
+now settles unknown-priced answers with genuine proof and preserved attempt,
+model, source and allocation refs while S5 returns unavailable. A missing unpriced
+counter can still settle known input-only cost. Both SDKs were checked through the
+S5 source namespace, including malformed/absent/null usage, context/live-provider
+refusal without dispatch and a hard deadline with owned worker closure. Successor
+combined acceptance remains pending independent review; no successor installed
+wheel or hosted Linux/Bolt runtime is qualified. Prior source/wheel editions and
+their failures remain preserved separately.
 
 Importing this repo into Bolt does not execute or provision Python. A hosted
 analysis endpoint or interactive viewer needs separate design and backend

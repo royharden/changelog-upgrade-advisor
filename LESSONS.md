@@ -48,3 +48,8 @@
 - A producer error can follow a durable dispatched attempt and unknown liability.
   Retain the caller's allocation reference and unknown IDs/usage; never map that
   case to "not run" or release its hold. Keep canonical fixes with the producer.
+- After adopting a canonical accounting repair, compare the consumer's returned
+  usage and provenance with the actual Ledger settlement hash and child completion
+  proof. A bare unknown-dispatch marker is not a genuine settlement. Price policy
+  determines required counters: missing an unpriced counter can still allow known
+  cost. Preserve immutable old review artifacts before advancing the source.
