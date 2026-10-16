@@ -50,7 +50,9 @@ function, hosted backend or deployment. Python/Node analysis runs locally; its
 standalone report is a static artifact. The staged-secret guard is bounded and
 cannot guarantee detection of every secret format. Offline demos need no keys.
 
-The supported quickstart uses a source checkout with its pinned npm dependency.
-Detached source-closure checks exercise the actual normal/refusal CLI; a Python
-wheel installation and hosted execution have not been qualified. Static reports
-are portable artifacts, not an installed analysis service.
+The source-checkout quickstart uses its pinned npm dependency. Local Windows
+wheel installation has been independently checked with actual installed-module
+and generated-entrypoint normal/refusal journeys, native Node and bundled semver.
+Overwrite and malformed-input controls also passed. Hosted Linux CI and Bolt
+execution remain unverified. Static reports are portable artifacts, not a hosted
+analysis service.
