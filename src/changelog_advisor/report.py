@@ -2,12 +2,9 @@
 
 import html
 import json
-import re
 from pathlib import Path
 
-
-def md(value):
-    return re.sub(r"([\\`*_{}\[\]()#+.!|>~\-])", r"\\\1", html.escape(str(value)))
+from .shared.cited.markdown import escape_markdown as md
 
 
 def coverage_summary(package):

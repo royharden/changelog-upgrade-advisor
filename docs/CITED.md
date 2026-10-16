@@ -44,6 +44,34 @@ owner-app imports and key lookup denied. Consumers still need exact source
 commit/hash/license publication and their own joined check; this capability is
 not automatically wired into the CLI or an external consumer.
 
+## Portable assessed-finding Markdown
+
+`cited/markdown.py` exports `render_assessment(assessment,max_output_bytes=...)`
+and the shared `escape_markdown` helper used by the application checklist. Obtain
+the EvidenceAssessment with `assess_required_evidence(finding,registry,context)`
+using the caller's actual source/policy resolver before rendering. The renderer
+performs no source access, policy lookup, resolution, network, model or file I/O.
+It cannot authenticate a supplied assessment's execution or certify semantic truth.
+
+It validates Finding/Resolution wire shape, ordered one-result-per-required-pointer
+cardinality and the available source/revision/artifact/literal-excerpt bindings.
+It recomputes counts instead of trusting supplied summaries. Empty or unresolved
+evidence displays unsupported; a previously unsupported finding is never promoted.
+Every pointer remains visible with its source hashes/revision, locator, reported
+resolution/reason/scope, optional provenance and literal resolved or explicitly
+unresolved quoted claim. Optional method/policy/model/probability/confidence fields
+are labelled reported metadata, not calibration or live-execution proof.
+
+Output is escaped literal Markdown without generated links or active HTML. The
+default and maximum complete-output bound is 1 MiB of UTF-8; callers may reduce
+it. Invalid/misbound assessments or output beyond the bound raise ValueError;
+the renderer never returns a truncated checklist that hides required evidence.
+The renderer-only detached closure is `__init__.py,models.py,rowcanonical.py,
+registry.py,assessment.py,markdown.py`, plus compatible Pydantic and MIT notices.
+The actual detached source test additionally copies memory.py, obtains a real
+supplied-memory assessment, then renders resolved and uninstalled-domain cases
+under `-I -B` with source reads, Node/subprocess, network and key lookup denied.
+
 ## Explicit memory sources
 
 Use `MemorySource.from_bytes` with namespace_id,source_id,source_revision, immutable raw bytes, explicit identity or crlf-to-lf policy, and optional trusted `SectionSpan(section_id,line_start,line_end)` tuples. Sections are declared before hashing, not parsed from source headings. Invalid UTF8, mutable input, overflow, duplicate section IDs and out-of-source spans refuse the complete source. No file/URL/archive loader exists. Defaults are256KiB/source,5000lines,500sections,128retained snapshots,8MiB raw total; callers may tighten within these ceilings. Resolver limits apply to each retained source as well as the collection. Bodies/corpus are never silently truncated.

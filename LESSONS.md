@@ -36,3 +36,6 @@
 - Export the same advisory adapter that the application consumes. Re-normalize
   retained raw records before trusting a derived quote, and keep citation fidelity,
   deterministic membership and conditional usage as separate results.
+- Portable presentation must preserve unresolved evidence and recompute counts,
+  without treating reported resolver results or model confidence as authentication.
+  Refuse oversized complete output rather than dropping evidence to fit.

@@ -67,6 +67,11 @@ The app's retained advisory citation adapter is reusable as
 records with explicit access/current-source policies. Citation fidelity remains
 separate from membership and conditional usage; see [the advisory contract](docs/advisories.md).
 
+`shared/cited/markdown.py` renders generic assessed Findings with all required
+pointers, counts and reported resolution states. It shares the checklist's literal
+escaping helper and refuses incomplete/misbound or oversized output; it does not
+perform source verification or promote semantic claims.
+
 The local source closure has a detached normal/refusal CLI control with its own
 pinned npm dependency. It does not import the original checkout or live SDKs.
 Published wheels and a hosted analysis service have not been qualified.
