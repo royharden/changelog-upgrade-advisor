@@ -23,8 +23,9 @@ query.
 The keyword baseline is uncalibrated and can flag internal changes or miss changes
 without keywords. Typed/generative builders exist, but offline application runs
 return unavailable for those methods. An optional exact-source S3 SDK transport
-and programmatic S5 simulation join are installed and checked on mock wire with
-real local accounting. This is not a funded live call, project-account proof,
+and programmatic S5 simulation join are adopted and checked from the consumer
+source namespace, using installed SDKs, mock wire and real local accounting.
+This is not a funded live call, project-account proof,
 genuine model quality, selected threshold or model evaluation. Rule screening
 does not establish injection robustness.
 
