@@ -39,3 +39,6 @@
 - Portable presentation must preserve unresolved evidence and recompute counts,
   without treating reported resolver results or model confidence as authentication.
   Refuse oversized complete output rather than dropping evidence to fit.
+- Keep a pointer's declared quote digest separate from the resolver's reported
+  digest. Test unavailable resolution with a digest distinct from the source and
+  artifact hashes so incidental matching text cannot hide missing evidence.

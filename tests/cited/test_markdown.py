@@ -75,6 +75,8 @@ def test_actual_assessed_finding_keeps_partial_and_all_source_locator_quote_fiel
     assert "> Literal evidence" in markdown
     pointer = value.finding.evidence[0]
     assert pointer.source_sha256 in markdown and pointer.evidence_artifact_sha256 in markdown
+    assert "Declared excerpt SHA256: " + pointer.locator.excerpt_sha256 in markdown
+    assert "Reported excerpt SHA256: " + value.resolutions[0].excerpt_sha256 in markdown
     assert "Reported resolution: resolved" in markdown and "line\\_start" in markdown
     assert "Reported probability: 1\\.0" in markdown
 
@@ -98,6 +100,32 @@ def test_empty_evidence_and_false_reason_counts_do_not_invent_support():
     assert "Verdict: unsupported" in markdown and "No required evidence supplied." in markdown
     assert "Evidence: required 0; resolved 0; unresolved 0" in markdown
     assert "100" not in markdown
+
+
+def test_unresolved_pointer_keeps_declared_digest_separate_from_reported_result():
+    """what_bug_this_catches: S5-RV2-001 drops an unresolved quote's unique digest."""
+    import hashlib
+
+    value = assessment(supported=False)
+    quote = "Unique unresolved quotation, distinct from the source's complete text.\n"
+    digest = hashlib.sha256(quote.encode("utf8")).hexdigest()
+    pointer = value.finding.evidence[0].model_copy(
+        update={
+            "locator": LineLocator(line_start=1, line_end=1, quote=quote, excerpt_sha256=digest)
+        }
+    )
+    assert digest not in (pointer.source_sha256, pointer.evidence_artifact_sha256)
+    ref = ArtifactRef(artifact_id="p", artifact_sha256="a" * 64, profile_id="p/1")
+    context = ResolutionContext(namespace_id="ns", access_policy_ref=ref, generation_policy_ref=ref)
+    actual = assess_required_evidence(
+        value.finding.model_copy(update={"evidence": (pointer,)}), Registry(), context
+    )
+    assert actual.resolutions[0].excerpt_sha256 is None
+    markdown = render_assessment(actual)
+    assert "Declared excerpt SHA256: " + digest in markdown
+    assert "Reported excerpt SHA256:" not in markdown
+    assert "Unresolved quoted claim:" in markdown and escape_markdown(quote.rstrip()) in markdown
+    assert "domain\\_not\\_installed" in markdown and "Verdict: unsupported" in markdown
 
 
 @pytest.mark.parametrize(

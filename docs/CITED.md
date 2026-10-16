@@ -61,6 +61,8 @@ Every pointer remains visible with its source hashes/revision, locator, reported
 resolution/reason/scope, optional provenance and literal resolved or explicitly
 unresolved quoted claim. Optional method/policy/model/probability/confidence fields
 are labelled reported metadata, not calibration or live-execution proof.
+The declared pointer excerpt SHA256 is retained separately from the reported
+result excerpt SHA256, including when resolution is unavailable and has no digest.
 
 Output is escaped literal Markdown without generated links or active HTML. The
 default and maximum complete-output bound is 1 MiB of UTF-8; callers may reduce

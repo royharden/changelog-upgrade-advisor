@@ -121,6 +121,9 @@ def render_assessment(
         if locator is not None:
             coordinates = locator.model_dump(mode="json", exclude={"quote", "excerpt_sha256"})
             add("Locator: " + literal(json.dumps(coordinates, ensure_ascii=False, sort_keys=True)))
+        declared_digest = getattr(locator, "excerpt_sha256", None)
+        if declared_digest is not None:
+            add("Declared excerpt SHA256: " + declared_digest)
         add("Reported resolution: " + result.status + "; reason " + literal(result.reason))
         if result.scope is not None:
             add("Reported scope: " + literal(result.scope))
