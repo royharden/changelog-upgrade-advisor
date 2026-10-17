@@ -1,24 +1,37 @@
-# Exact canonical S3 native SDK source adoption
+# S3 native SDK source provenance
 
-Source: local llm-router-eval, commit `dfab37dcf32ecc85aceaf828be1332ba711712a8`,
-tree `f3ea153d34f799e065e9a3f1d64c2ade38d989c0`.
-INT2 accepted the bounded producer repair in T2-S3-unknown-usage-disposition-006,
-SHA256 170d3ef0f8e17fbb2c3877b2d4fc4fd71f4d862e3468c17418ee61383a97afd0;
-consumer replacement was named by D14-T2-S3-canonical-successor-080,
-SHA256 f3528d5b7fee89e9808f74ea4d12dd9c0f1c1b0a1a2739ba981f51ccf1bbfe83.
-Public provider/callledger/shared initializer Git bytes are copied unchanged;
-relative imports and type identity are preserved. SDK dependencies remain pinned
-openai 3.31.0 (Apache-2.0) and typesafe-sdk 0.7.5 (MIT). The product MIT notice is
-at vendor/s3-sdk/LICENSE. Original offline vendor/s3 conformance assets remain.
+This consumer uses a composite source edition from llm-router-eval:
 
-S5 owns consumer joins and mapping; exact prior 775b source/config and SDK wheel
-060/061 artifacts/installed targets were preserved before replacement in outer
-D14/SDK-successor-080/preservation-before-first-write.json. Those review targets
-remain unchanged. The new vendor manifest records all source and mapping hashes.
-The controller now prices usage before settlement: unknown-priced answers become
-unavailable while genuine settlement and attempt/model/source/allocation refs stay
-available. Missing an unpriced counter alone need not make known cost unknown.
+- Base: `dfab37dcf32ecc85aceaf828be1332ba711712a8`, tree
+  `f3ea153d34f799e065e9a3f1d64c2ade38d989c0`.
+- Response-cap supplement: only `providers/controller.py` and `providers/sdk.py`
+  from `ff6eb72bc8c84209e40dc1987d4e34fb94f15bb4`, tree
+  `98d843a10eec9bb33ec741bf2e7ec38e2bf3582f`.
 
-This adoption certifies no live account, primary prices, funding, paid call, model
-quality, POSIX runtime, remote CI, installed successor wheel or whole application.
-Mock SDK wire uses simulation; ambient credentials are not read.
+The two supplemented runtime files are unchanged upstream Git bytes. The other
+18 mapped assets remain pinned to the base edition. Runtime relative imports and
+type identity are preserved. The three retained vendor test files replace the
+literal `llm_router_eval` namespace with `changelog_advisor`; their assertions and
+20-second fixture profile are unchanged. This is not a full 20-file adoption of
+the supplement commit or its five new upstream cap tests.
+
+`vendor/s3-sdk/RESPONSE-CAP-PROVENANCE.json` records all 20 product-relative paths,
+selected upstream commits, raw and consumer hashes, and namespace transformations.
+S5 adds ten consumer cap cases in
+`tests/consumer_contracts/s3_sdk/test_s5_response_cap.py`. They cover both SDK
+flavors, refusal at preparation/admission/run, and valid boundary caps. Their
+test bodies and parameterization retain the diagnostic regression; import grouping
+and layout follow the project's formatter.
+
+The supplement rejects unsupported SDK response limits before funding or dispatch.
+Only integer limits from 1 through 65536 are supported. Existing reservation and
+unknown-usage settlement behavior remain intact. Missing an unpriced counter alone
+need not make known cost unknown. The callledger, wire models, SDK dependencies
+and lockfiles are unchanged. SDK pins remain openai 3.31.0 (Apache-2.0) and
+typesafe-sdk 0.7.5 (MIT). Preserve the upstream MIT notice at
+`vendor/s3-sdk/LICENSE`. Original offline `vendor/s3` conformance assets are retained.
+
+These source and mock-wire controls do not establish a live account, primary
+prices, funding, paid calls, model quality, POSIX runtime, remote CI, an installed
+successor wheel, Bolt execution or whole-application acceptance. SDK mock wire
+uses synthetic simulation inputs and does not read ambient credentials.

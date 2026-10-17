@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "component": "S3 native SDK response-cap supplement",
+  "upstream_repository": "llm-router-eval",
+  "base_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+  "supplement_source_commit": "ff6eb72bc8c84209e40dc1987d4e34fb94f15bb4",
+  "edition": "two raw runtime files from supplement; eighteen mapped assets retained from base",
+  "mappings": [
+    {
+      "producer_path": "src/llm_router_eval/shared/callledger/README.md",
+      "consumer_path": "src/changelog_advisor/shared/callledger/README.md",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "bdc63ddb26832750654cdbffc09fca33d46b9e5ef2e0b7b1a34cac4e1cea0c50",
+      "consumer_sha256": "bdc63ddb26832750654cdbffc09fca33d46b9e5ef2e0b7b1a34cac4e1cea0c50",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/callledger/__init__.py",
+      "consumer_path": "src/changelog_advisor/shared/callledger/__init__.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "c02724ab9a21cfb0387e5d87183634e33a40e8953bd73f443b7489496e260349",
+      "consumer_sha256": "c02724ab9a21cfb0387e5d87183634e33a40e8953bd73f443b7489496e260349",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/callledger/ledger.py",
+      "consumer_path": "src/changelog_advisor/shared/callledger/ledger.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "3957431f57e8ecbe3147b37aa19487e68331ccd20e357ee20639e09c0f568e31",
+      "consumer_sha256": "3957431f57e8ecbe3147b37aa19487e68331ccd20e357ee20639e09c0f568e31",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/callledger/models.py",
+      "consumer_path": "src/changelog_advisor/shared/callledger/models.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "7274d1eebed5370460d83af6e4187cc74037d0ab600889219423dbcdd81277e7",
+      "consumer_sha256": "7274d1eebed5370460d83af6e4187cc74037d0ab600889219423dbcdd81277e7",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/callledger/pricing.py",
+      "consumer_path": "src/changelog_advisor/shared/callledger/pricing.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "daf38f487eeb70b48cc4025c54a19eea581a2d5d00084f534d9f2b9a55056c74",
+      "consumer_sha256": "daf38f487eeb70b48cc4025c54a19eea581a2d5d00084f534d9f2b9a55056c74",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/callledger/projection.py",
+      "consumer_path": "src/changelog_advisor/shared/callledger/projection.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "5c0194e299b2c58f85e745ac093063dcb89689ea162ba378a37afc48a0f4dc69",
+      "consumer_sha256": "5c0194e299b2c58f85e745ac093063dcb89689ea162ba378a37afc48a0f4dc69",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/__init__.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/__init__.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "7fd3a8b52b8ee037bed53e18b01aac983bb922c19284c181bf91a12eaa5634cd",
+      "consumer_sha256": "7fd3a8b52b8ee037bed53e18b01aac983bb922c19284c181bf91a12eaa5634cd",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/adapters.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/adapters.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "0f04a7f3231c2a22c36541b9cdaeb53214899d4da111f264eab73278847a3023",
+      "consumer_sha256": "0f04a7f3231c2a22c36541b9cdaeb53214899d4da111f264eab73278847a3023",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/captures.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/captures.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "0c91934a090d5f1481fd1116c4ee74a073e0cc8b6ee9c1c8d19cacdce2ebde00",
+      "consumer_sha256": "0c91934a090d5f1481fd1116c4ee74a073e0cc8b6ee9c1c8d19cacdce2ebde00",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/controller.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/controller.py",
+      "selected_source_commit": "ff6eb72bc8c84209e40dc1987d4e34fb94f15bb4",
+      "producer_sha256": "0e18deb5303a2d0b6ff1e57db15507a29e76960ef416056c31ed32232db9b747",
+      "consumer_sha256": "0e18deb5303a2d0b6ff1e57db15507a29e76960ef416056c31ed32232db9b747",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/images.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/images.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "d847124ef8dc76461f3257df2586075f7ca9602bebe4a15009c6a48aefa6aa13",
+      "consumer_sha256": "d847124ef8dc76461f3257df2586075f7ca9602bebe4a15009c6a48aefa6aa13",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/models.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/models.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "7d00a646f583aec1b77abd8c956f1b0c830726be3c17ce37737ac05841060ea2",
+      "consumer_sha256": "7d00a646f583aec1b77abd8c956f1b0c830726be3c17ce37737ac05841060ea2",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/repair.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/repair.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "0908fd8a8905b49376520eb63e4cd7cd697dc8bdfd0b895f8632819952f96c7d",
+      "consumer_sha256": "0908fd8a8905b49376520eb63e4cd7cd697dc8bdfd0b895f8632819952f96c7d",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/schema.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/schema.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "a0c4a84b14a95d2834a150e8fa16224ccec03e1a84325b359b92868a61613391",
+      "consumer_sha256": "a0c4a84b14a95d2834a150e8fa16224ccec03e1a84325b359b92868a61613391",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/sdk.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/sdk.py",
+      "selected_source_commit": "ff6eb72bc8c84209e40dc1987d4e34fb94f15bb4",
+      "producer_sha256": "4a9766a65fe03f0c6c25e302db76a2b2d35b0d9b5412d9bb8ada630b98cab886",
+      "consumer_sha256": "4a9766a65fe03f0c6c25e302db76a2b2d35b0d9b5412d9bb8ada630b98cab886",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/providers/sdk_worker.py",
+      "consumer_path": "src/changelog_advisor/shared/providers/sdk_worker.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "bb884db161e638e29aad73c66d53290c86148998bf238207e7cfed1112d8ed2c",
+      "consumer_sha256": "bb884db161e638e29aad73c66d53290c86148998bf238207e7cfed1112d8ed2c",
+      "transform": "none"
+    },
+    {
+      "producer_path": "src/llm_router_eval/shared/__init__.py",
+      "consumer_path": "src/changelog_advisor/shared/__init__.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "60913c6d12caa4ba9139d870ad493d4a68738580c996662d7ad7b8d71622e1b8",
+      "consumer_sha256": "60913c6d12caa4ba9139d870ad493d4a68738580c996662d7ad7b8d71622e1b8",
+      "transform": "none"
+    },
+    {
+      "producer_path": "tests/providers/conftest.py",
+      "consumer_path": "vendor/s3-sdk/tests/providers/conftest.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "b9dd0c50f8c8d07a4fc5c4e8e3c7b6740ef6ea405bf53dcee31ddbff26f64125",
+      "consumer_sha256": "ec4848bebf8f01062c17bd60d19ce9c326b1d58167419b9740f2ef11be14e475",
+      "transform": "test-only namespace"
+    },
+    {
+      "producer_path": "tests/providers/test_sdk_transport.py",
+      "consumer_path": "vendor/s3-sdk/tests/providers/test_sdk_transport.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "d2242ff150812fe3f4d3aac3791ccba22d3686aea71a72b21727bfdc78ac4146",
+      "consumer_sha256": "b15b94b777b2a031f124502b0ff1599bc959b0cb7578d7b657965ee7f323065a",
+      "transform": "test-only namespace"
+    },
+    {
+      "producer_path": "tests/providers/test_sdk_wire_worker.py",
+      "consumer_path": "vendor/s3-sdk/tests/providers/test_sdk_wire_worker.py",
+      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
+      "producer_sha256": "e6dca144c7c9cbbded9e948d8c96456bb7c38a815cd847044e4a4cd6a8d5619e",
+      "consumer_sha256": "1f64bb0a92599bd1aeca1cdb93857234224bac7a9d4ad68d1f24bf5d32009018",
+      "transform": "test-only namespace"
+    }
+  ],
+  "upstream_license": {
+    "name": "MIT",
+    "sha256": "431665582156c442d0448d1f5cd2e45663ab96e6cf098711ffa58c4bb01b69e6",
+    "consumer_path": "vendor/s3-sdk/LICENSE"
+  },
+  "consumer_regression": {
+    "path": "tests/consumer_contracts/s3_sdk/test_s5_response_cap.py",
+    "sha256": "7b00e5110babc1056c171297324bd191b7457d184b1f9acd4f06eace8539aefd",
+    "diagnostic_sha256": "8b654f6f343544200fc108e5d48cb5a117a212f5b107b17cde800b5665754dc9",
+    "transformation": "import grouping and formatter layout only; normalized AST equality verified",
+    "cases": 10
+  },
+  "constraints": [
+    "retained vendor test namespace substitution only",
+    "original 20-second consumer profile",
+    "five new upstream cap tests not adopted",
+    "SDK locks, callledger and wire models unchanged"
+  ]
+}
