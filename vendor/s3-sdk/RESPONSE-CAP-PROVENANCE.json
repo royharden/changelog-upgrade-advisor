@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "component": "S3 native SDK response-cap supplement",
+  "component": "S3 native SDK response-cap and lazy-export supplements",
   "upstream_repository": "llm-router-eval",
   "base_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
   "supplement_source_commit": "ff6eb72bc8c84209e40dc1987d4e34fb94f15bb4",
-  "edition": "two raw runtime files from supplement; eighteen mapped assets retained from base",
+  "edition": "one raw initializer from lazy-export supplement; two raw runtime files from response-cap supplement; seventeen mapped assets retained from base",
   "mappings": [
     {
       "producer_path": "src/llm_router_eval/shared/callledger/README.md",
@@ -57,9 +57,9 @@
     {
       "producer_path": "src/llm_router_eval/shared/providers/__init__.py",
       "consumer_path": "src/changelog_advisor/shared/providers/__init__.py",
-      "selected_source_commit": "dfab37dcf32ecc85aceaf828be1332ba711712a8",
-      "producer_sha256": "7fd3a8b52b8ee037bed53e18b01aac983bb922c19284c181bf91a12eaa5634cd",
-      "consumer_sha256": "7fd3a8b52b8ee037bed53e18b01aac983bb922c19284c181bf91a12eaa5634cd",
+      "selected_source_commit": "b9d3e47f62749a57c1f850f7713db66d29cb684c",
+      "producer_sha256": "9bf195c6e535c3f6f6d59a9304053ede4684b6f5e1cf5e489e1cdeb6f9e8e8d8",
+      "consumer_sha256": "9bf195c6e535c3f6f6d59a9304053ede4684b6f5e1cf5e489e1cdeb6f9e8e8d8",
       "transform": "none"
     },
     {
@@ -183,6 +183,14 @@
     "retained vendor test namespace substitution only",
     "original 20-second consumer profile",
     "five new upstream cap tests not adopted",
-    "SDK locks, callledger and wire models unchanged"
-  ]
+    "SDK locks, callledger and wire models unchanged",
+    "producer lazy-export tests not substituted for retained vendor tests"
+  ],
+  "initializer_source_commit": "b9d3e47f62749a57c1f850f7713db66d29cb684c",
+  "consumer_lazy_export_regression": {
+    "path": "tests/consumer_contracts/s3_sdk/test_s5_lazy_exports.py",
+    "sha256": "6d3ab7544c251292a6ea668dcb6b6b6abaabe043e5004b3739bed7dc229233e2",
+    "cases": 3,
+    "scope": "Fresh bare-package and SDK-worker import graphs; all thirteen canonical public identities. Graph subprocesses are not native SDK dispatch evidence."
+  }
 }
