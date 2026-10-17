@@ -189,8 +189,8 @@
   "initializer_source_commit": "b9d3e47f62749a57c1f850f7713db66d29cb684c",
   "consumer_lazy_export_regression": {
     "path": "tests/consumer_contracts/s3_sdk/test_s5_lazy_exports.py",
-    "sha256": "6d3ab7544c251292a6ea668dcb6b6b6abaabe043e5004b3739bed7dc229233e2",
-    "cases": 3,
+    "sha256": "9a3f12d0ab7c73d6d028083322a68d365d3e25b6d91db78217547dc1ab106f4b",
+    "cases": 8,
     "scope": "Fresh bare-package and SDK-worker import graphs; all thirteen canonical public identities. Graph subprocesses are not native SDK dispatch evidence."
   }
 }
