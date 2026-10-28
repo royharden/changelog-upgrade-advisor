@@ -49,7 +49,8 @@ print(json.dumps({'normal_exit':0,'refusal_exit':3,'owner_imports':0,'provider_c
         cwd=tmp_path,
         capture_output=True,
         text=True,
-        timeout=90,
+        # Two local demos can outlast 90s when semver calls are slow but still bounded.
+        timeout=240,
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert json.loads(result.stdout.splitlines()[-1]) == {

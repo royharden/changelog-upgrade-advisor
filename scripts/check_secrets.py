@@ -9,6 +9,7 @@ from collections.abc import Callable, Iterable
 from pathlib import PurePosixPath
 
 MAX_BLOB_BYTES = 2 * 1024 * 1024
+GIT_QUERY_TIMEOUT_SECONDS = 30
 FORBIDDEN_PARTS = {
     ".git",
     ".creds",
@@ -61,7 +62,9 @@ def inspect_paths(
 
 
 def _git(*arguments: str) -> bytes:
-    result = subprocess.run(["git", *arguments], capture_output=True, check=False, timeout=15)
+    result = subprocess.run(
+        ["git", *arguments], capture_output=True, check=False, timeout=GIT_QUERY_TIMEOUT_SECONDS
+    )
     if result.returncode:
         raise RuntimeError("git_index_query_failed")
     return result.stdout

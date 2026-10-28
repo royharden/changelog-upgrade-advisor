@@ -53,6 +53,9 @@ class GraphCleanupError(GraphRunError):
     pass
 
 
+GRAPH_OPERATION_LIMIT_SECONDS = 45
+
+
 def owned_graph(program, env):
     """Own before execution; always reap independently of kill/poll success."""
     started = time.monotonic()
@@ -92,13 +95,15 @@ def owned_graph(program, env):
             readers.append(reader)
             reader.start()
         if job is not None:
-            process.wait(timeout=max(0.001, 20 - (time.monotonic() - started)))
+            process.wait(
+                timeout=max(0.001, GRAPH_OPERATION_LIMIT_SECONDS - (time.monotonic() - started))
+            )
         else:
             # Keep the session leader unreaped until group termination. Its PID
             # cannot be reused to identify somebody else's process group.
             while os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOWAIT | os.WNOHANG) is None:
-                if time.monotonic() - started >= 20:
-                    raise subprocess.TimeoutExpired(process.args, 20)
+                if time.monotonic() - started >= GRAPH_OPERATION_LIMIT_SECONDS:
+                    raise subprocess.TimeoutExpired(process.args, GRAPH_OPERATION_LIMIT_SECONDS)
                 time.sleep(0.005)
     except subprocess.TimeoutExpired:
         timed_out = True
@@ -182,7 +187,7 @@ def owned_graph(program, env):
         "job_members_before_close": members_before,
         "owned_tree_closed": reaped and not errors and (job is None or active_after == 0),
         "timed_out": timed_out,
-        "operation_limit_seconds": 20,
+        "operation_limit_seconds": GRAPH_OPERATION_LIMIT_SECONDS,
         "operation_elapsed_seconds": operation_elapsed,
         "cleanup_limit_seconds": 20,
         "cleanup_elapsed_seconds": cleanup_elapsed,
@@ -195,7 +200,9 @@ def owned_graph(program, env):
     if errors or not observation["owned_tree_closed"]:
         raise GraphCleanupError("graph cleanup could not be established", observation)
     if timed_out:
-        raise GraphTimeout("fresh graph control exceeded 20 seconds", observation)
+        raise GraphTimeout(
+            f"fresh graph control exceeded {GRAPH_OPERATION_LIMIT_SECONDS} seconds", observation
+        )
     if execution_error or process.returncode:
         raise GraphRunError("graph process failed", observation)
     if any(len(value) > 262144 for value in chunks.values()):
@@ -341,7 +348,7 @@ def test_graph_timeout_closes_interpreter_and_descendant(record_property):
     assert len({row["pid"] for row in probes}) == 2
     assert observed["timed_out"] and observed["launcher_reaped"]
     assert observed["owned_tree_closed"] and not observed["cleanup_errors"]
-    assert observed["operation_limit_seconds"] == 20
+    assert observed["operation_limit_seconds"] == GRAPH_OPERATION_LIMIT_SECONDS
     if os.name == "nt":
         assert observed["assigned_before_execution"]
         assert observed["active_owned_processes_after"] == 0

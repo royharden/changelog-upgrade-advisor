@@ -132,11 +132,26 @@ def _remaining(deadline):
     return value
 
 
+REQUEST_DEADLINE_SECONDS = 30
+COLD_START_DEADLINE_SECONDS = 30
+
+
 def _operation(method):
-    """One deadline covers validation, lock, startup, IO and result validation."""
+    """One deadline covers validation, lock, startup, IO and result validation.
+
+    Every real call gets 30 seconds. The first call also hashes the pinned
+    semver tree and spawns node. Later calls stay on the same bound: a 5 second
+    cap turned a slow-but-finished demo into a partial checklist on a loaded machine.
+    """
 
     def run(self, *args, **kwargs):
-        deadline = time.monotonic() + 5
+        real_transport = getattr(self._transport, "__func__", None) is getattr(
+            self._exchange, "__func__", None
+        )
+        cold = self._fingerprint is None and real_transport
+        deadline = time.monotonic() + (
+            COLD_START_DEADLINE_SECONDS if cold else REQUEST_DEADLINE_SECONDS
+        )
         if not self._lock.acquire(timeout=_remaining(deadline)):
             raise VersionRuntimeError("version_runtime_timeout")
         self._local.deadline = deadline

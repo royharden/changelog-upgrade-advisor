@@ -63,7 +63,8 @@ def test_staged_blob_is_checked_even_if_working_file_was_cleaned(tmp_path):
         cwd=tmp_path,
         capture_output=True,
         check=False,
-        timeout=15,
+        # Above three 30s git queries so a slow Windows git returns its own status.
+        timeout=120,
     )
     assert result.returncode == 1
     report = json.loads(result.stdout)

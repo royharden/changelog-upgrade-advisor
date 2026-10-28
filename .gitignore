@@ -21,3 +21,9 @@ junit*.xml
 .thinking/
 .chatexports/
 agentops/
+ArchiveManager-creds.txt
+*.pem
+*.key
+*.p12
+*.pfx
+*.zip
