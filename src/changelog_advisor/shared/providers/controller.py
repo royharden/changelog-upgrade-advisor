@@ -783,11 +783,12 @@ class Provider:
                 outcome.normalized_usage, reservation_usd=view.reservation_usd
             )
             if observation.status == "unknown":
-                # A usable answer is not a known settlement. Keep the dispatch and
+                # A usable answer is not a known settlement. Keep that dispatch and
                 # liability, stop further sends, and return provenance to the caller.
-                retryable = False
+                # An unpriced provider error, such as an empty 429, may still retry.
                 repairable = False
                 if outcome.status == "ok":
+                    retryable = False
                     outcome = replace(outcome, status="unknown", text=None, parsed=None, typed=None)
                     last_error_code = "unknown_dispatch"
             metadata = self._metadata(

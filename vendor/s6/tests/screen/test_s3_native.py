@@ -384,7 +384,9 @@ print("detached native screen + actual Ledger pass; mock origin; zero dispatch")
         capture_output=True,
         text=True,
         check=False,
-        timeout=20,
+        # The detached interpreter imports the copied screen stack. 20s was too
+        # tight for that startup on a loaded machine; the bound stays finite.
+        timeout=90,
     )
     assert result.returncode == 0, result.stderr
     assert "detached native screen + actual Ledger pass" in result.stdout

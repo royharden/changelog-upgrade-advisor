@@ -118,7 +118,7 @@ def test_result_validation_stays_inside_whole_operation_deadline(monkeypatch):
 
     def transport(node, helper, payload):
         result = response(payload)
-        clock[0] += 5.01
+        clock[0] += 30.01
         return result
 
     oracle._transport = transport
@@ -130,10 +130,13 @@ def test_result_validation_stays_inside_whole_operation_deadline(monkeypatch):
 def test_lock_wait_has_deadline_and_never_launches(monkeypatch):
     class Busy:
         def acquire(self, timeout):
-            assert 0 < timeout <= 5
+            assert 0 < timeout <= 30
             return False
 
     oracle = NodeSemver()
+    # Real calls use the 30s bound. This fingerprint only keeps the test off
+    # the cold-start branch; it still must not launch a process.
+    oracle._fingerprint = b"steady"
     oracle._lock = Busy()
     monkeypatch.setattr(subprocess, "Popen", lambda *a, **k: pytest.fail("busy context launched"))
     with pytest.raises(VersionRuntimeError, match="timeout"):
