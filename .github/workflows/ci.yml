@@ -13,8 +13,8 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
-      - run: uv sync --frozen
       - run: npm ci --ignore-scripts
+      - run: uv sync --frozen
       - run: uv run --frozen --offline ruff check .
       - run: uv run --frozen --offline ruff format --check .
       - run: uv run --frozen --offline pytest tests vendor --junitxml=junit-bootstrap.xml
